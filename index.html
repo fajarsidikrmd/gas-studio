@@ -65,6 +65,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+    <!-- CodeMirror Search Cursor Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
 
     <!-- Google Identity Services (GIS SDK) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -131,6 +133,10 @@
         .dark .CodeMirror-activeline-background { background: rgba(56, 139, 253, 0.08) !important; }
         .dark .CodeMirror-cursor { border-left: 2px solid #58a6ff !important; }
 
+        /* Search Match Highlights */
+        .cm-searching { background-color: rgba(250, 204, 21, 0.45); border-radius: 2px; }
+        .cm-searching-active { background-color: #f59e0b !important; color: #000 !important; font-weight: bold; }
+
         .accessory-btn {
             user-select: none;
             -webkit-user-select: none;
@@ -173,6 +179,10 @@
             </div>
 
             <div class="flex items-center space-x-1">
+                <button onclick="openSearchBar(false)" title="Cari Kode (Ctrl+F)" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs active:scale-95 transition">
+                    <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
+                </button>
+
                 <button onclick="toggleTheme()" title="Ubah Tema" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-amber-500 dark:text-amber-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs active:scale-95 transition">
                     <i id="themeIcon" class="fa-solid fa-moon"></i>
                 </button>
@@ -199,6 +209,43 @@
                 </button>
             </div>
         </header>
+
+        <!-- ================= FLOATING SEARCH & REPLACE BAR ================= -->
+        <div id="searchBarWrapper" class="hidden bg-white dark:bg-gas-darkCard border-b border-slate-200 dark:border-gas-darkBorder px-2 py-1.5 z-30 flex flex-col space-y-1.5 shadow-md">
+            <div class="flex items-center space-x-1.5">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-2 top-2 text-slate-400 text-[9px]"></i>
+                    <input type="text" id="findInput" oninput="executeSearch(true)" placeholder="Cari teks di file..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md pl-6 pr-12 py-1 text-[10px] font-mono text-slate-800 dark:text-white focus:outline-none focus:border-blue-500">
+                    <span id="searchMatchBadge" class="absolute right-2 top-1.5 text-[8px] font-mono text-slate-400">0/0</span>
+                </div>
+                <button onclick="findPrev()" title="Sebelumnya (Shift+Enter)" class="w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center active:scale-95">
+                    <i class="fa-solid fa-chevron-up text-[9px]"></i>
+                </button>
+                <button onclick="findNext()" title="Berikutnya (Enter)" class="w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center active:scale-95">
+                    <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                </button>
+                <button onclick="toggleReplaceRow()" title="Mode Ganti Kata (Ctrl+H)" class="px-1.5 h-6 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center space-x-1 text-[9px] active:scale-95">
+                    <i class="fa-solid fa-arrows-rotate text-[8px]"></i>
+                </button>
+                <button onclick="closeSearchBar()" class="w-6 h-6 rounded text-slate-400 hover:text-rose-500 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Baris Replace -->
+            <div id="replaceRow" class="hidden flex items-center space-x-1.5 pt-0.5">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-pen-to-square absolute left-2 top-2 text-slate-400 text-[9px]"></i>
+                    <input type="text" id="replaceInput" placeholder="Ganti dengan..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md pl-6 pr-2 py-1 text-[10px] font-mono text-slate-800 dark:text-white focus:outline-none focus:border-purple-500">
+                </div>
+                <button onclick="replaceCurrent()" class="px-2 h-6 rounded bg-slate-100 dark:bg-slate-800 text-purple-600 dark:text-purple-400 border border-slate-200 dark:border-slate-700 text-[9px] font-medium active:scale-95">
+                    Ganti
+                </button>
+                <button onclick="replaceAll()" class="px-2 h-6 rounded bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-semibold active:scale-95">
+                    Semua
+                </button>
+            </div>
+        </div>
 
         <!-- ================= FILE TABS STRIP ================= -->
         <nav class="h-7 bg-slate-100 dark:bg-gas-dark border-b border-slate-200 dark:border-gas-darkBorder flex items-center px-1.5 space-x-1 overflow-x-auto no-scrollbar shrink-0 z-10" id="tabsContainer">
@@ -245,6 +292,11 @@
 
             <div class="flex items-center justify-between px-1.5 py-0.5 bg-slate-50 dark:bg-slate-900 text-[10px]">
                 <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
+                    <button class="accessory-btn px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 font-semibold border border-blue-200 dark:border-blue-800 flex items-center space-x-1 shrink-0" onclick="openSearchBar(false)" title="Cari Kode">
+                        <i class="fa-solid fa-magnifying-glass text-[8px]"></i>
+                        <span>Cari</span>
+                    </button>
+
                     <button class="accessory-btn px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-semibold border border-purple-200 dark:border-purple-800 flex items-center space-x-1 shrink-0" onclick="executeSuperPaste(false)" title="Tempel Clipboard">
                         <i class="fa-solid fa-paste text-[8px]"></i>
                         <span>Super Paste</span>
@@ -938,7 +990,6 @@
                 userAvatar.innerHTML = '<i class="fa-solid fa-user"></i>';
             }
 
-            // Refresh Project Sync status dot
             setDirty(APP_STATE.isDirty);
         }
 
@@ -1358,6 +1409,127 @@
                 appendLog("LOG", "Logger.log: " + selectedFunc + " berhasil dieksekusi pada " + time);
                 appendLog("SUCCESS", "Fungsi " + selectedFunc + "() selesai (" + duration + "s)");
             }, 250);
+        }
+
+        /* ================= FIND & REPLACE ENGINE ================= */
+        let searchMarkers = [];
+        let searchMatches = [];
+        let currentSearchIndex = -1;
+
+        function openSearchBar(showReplace = false) {
+            const wrapper = document.getElementById("searchBarWrapper");
+            const replaceRow = document.getElementById("replaceRow");
+            wrapper.classList.remove("hidden");
+            
+            if (showReplace) replaceRow.classList.remove("hidden");
+            
+            const findInput = document.getElementById("findInput");
+            if (editorInstance) {
+                const selection = editorInstance.getSelection();
+                if (selection && selection.length < 50) {
+                    findInput.value = selection;
+                }
+            }
+            
+            findInput.focus();
+            findInput.select();
+            executeSearch(false);
+        }
+
+        function closeSearchBar() {
+            document.getElementById("searchBarWrapper").classList.add("hidden");
+            clearSearchMarkers();
+            if (editorInstance) editorInstance.focus();
+        }
+
+        function toggleReplaceRow() {
+            const replaceRow = document.getElementById("replaceRow");
+            replaceRow.classList.toggle("hidden");
+        }
+
+        function clearSearchMarkers() {
+            searchMarkers.forEach(m => m.clear());
+            searchMarkers = [];
+            searchMatches = [];
+            currentSearchIndex = -1;
+            document.getElementById("searchMatchBadge").textContent = "0/0";
+        }
+
+        function executeSearch(jumpToFirst = true) {
+            clearSearchMarkers();
+            const query = document.getElementById("findInput").value;
+            if (!query || !editorInstance) return;
+
+            const doc = editorInstance.getDoc();
+            const cursor = doc.getSearchCursor(query, { line: 0, ch: 0 }, { caseFold: true });
+
+            while (cursor.findNext()) {
+                const from = cursor.from();
+                const to = cursor.to();
+                searchMatches.push({ from, to });
+                const marker = doc.markText(from, to, { className: "cm-searching" });
+                searchMarkers.push(marker);
+            }
+
+            if (searchMatches.length > 0) {
+                if (jumpToFirst) {
+                    currentSearchIndex = 0;
+                    focusCurrentMatch();
+                } else {
+                    document.getElementById("searchMatchBadge").textContent = "1/" + searchMatches.length;
+                }
+            } else {
+                document.getElementById("searchMatchBadge").textContent = "0/0";
+            }
+        }
+
+        function findNext() {
+            if (searchMatches.length === 0) return;
+            currentSearchIndex = (currentSearchIndex + 1) % searchMatches.length;
+            focusCurrentMatch();
+        }
+
+        function findPrev() {
+            if (searchMatches.length === 0) return;
+            currentSearchIndex = (currentSearchIndex - 1 + searchMatches.length) % searchMatches.length;
+            focusCurrentMatch();
+        }
+
+        function focusCurrentMatch() {
+            if (currentSearchIndex < 0 || currentSearchIndex >= searchMatches.length) return;
+            const match = searchMatches[currentSearchIndex];
+
+            editorInstance.setSelection(match.from, match.to);
+            editorInstance.scrollIntoView({ from: match.from, to: match.to }, 120);
+
+            document.getElementById("searchMatchBadge").textContent = (currentSearchIndex + 1) + "/" + searchMatches.length;
+        }
+
+        function replaceCurrent() {
+            if (currentSearchIndex < 0 || currentSearchIndex >= searchMatches.length) return;
+            const replaceText = document.getElementById("replaceInput").value;
+            const match = searchMatches[currentSearchIndex];
+
+            editorInstance.replaceRange(replaceText, match.from, match.to);
+            executeSearch(true);
+        }
+
+        function replaceAll() {
+            const query = document.getElementById("findInput").value;
+            const replaceText = document.getElementById("replaceInput").value;
+            if (!query || !editorInstance) return;
+
+            const doc = editorInstance.getDoc();
+            const cursor = doc.getSearchCursor(query, { line: 0, ch: 0 }, { caseFold: true });
+            
+            doc.operation(() => {
+                while (cursor.findNext()) {
+                    cursor.replace(replaceText);
+                }
+            });
+
+            executeSearch(false);
+            showToast("Semua kata '" + query + "' diganti!", "fa-circle-check", "text-purple-400");
         }
 
         /* ================= AI CHUNK ASSEMBLER ================= */
@@ -1988,11 +2160,38 @@
 
         function setupKeyboardShortcuts() {
             window.addEventListener("keydown", (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                // Ctrl + S / Cmd + S (Simpan ke Google Apps Script)
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
                     e.preventDefault();
                     saveProjectToGAS();
                 }
+                // Ctrl + F / Cmd + F (Buka Pencarian)
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+                    e.preventDefault();
+                    openSearchBar(false);
+                }
+                // Ctrl + H / Cmd + H (Buka Pencarian & Ganti)
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "h") {
+                    e.preventDefault();
+                    openSearchBar(true);
+                }
+                // Esc (Tutup Bar Pencarian)
+                if (e.key === "Escape") {
+                    closeSearchBar();
+                }
             });
+
+            // Enter & Shift+Enter di Input Pencarian
+            const findInput = document.getElementById("findInput");
+            if (findInput) {
+                findInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (e.shiftKey) findPrev();
+                        else findNext();
+                    }
+                });
+            }
         }
 
         function escapeHtml(str) {
