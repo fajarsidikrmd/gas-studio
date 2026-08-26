@@ -1411,9 +1411,10 @@
             }, 250);
         }
 
-        /* ================= FIND & REPLACE ENGINE ================= */
+        /* ================= FIND & REPLACE ENGINE (NATIVE & HIGH PERFORMANCE) ================= */
         let searchMarkers = [];
         let searchMatches = [];
+        let activeMatchMarker = null;
         let currentSearchIndex = -1;
 
         function openSearchBar(showReplace = false) {
@@ -1422,11 +1423,12 @@
             wrapper.classList.remove("hidden");
             
             if (showReplace) replaceRow.classList.remove("hidden");
+            else replaceRow.classList.add("hidden");
             
             const findInput = document.getElementById("findInput");
             if (editorInstance) {
                 const selection = editorInstance.getSelection();
-                if (selection && selection.length < 50) {
+                if (selection && selection.length > 0 && selection.length < 50) {
                     findInput.value = selection;
                 }
             }
@@ -1448,61 +1450,85 @@
         }
 
         function clearSearchMarkers() {
+            if (activeMatchMarker) {
+                activeMatchMarker.clear();
+                activeMatchMarker = null;
+            }
             searchMarkers.forEach(m => m.clear());
             searchMarkers = [];
             searchMatches = [];
             currentSearchIndex = -1;
-            document.getElementById("searchMatchBadge").textContent = "0/0";
+            const badge = document.getElementById("searchMatchBadge");
+            if (badge) badge.textContent = "0/0";
         }
 
-        function executeSearch(jumpToFirst = true) {
+        function executeSearch(fromTyping = false) {
             clearSearchMarkers();
-            const query = document.getElementById("findInput").value;
-            if (!query || !editorInstance) return;
+            const findInput = document.getElementById("findInput");
+            if (!findInput || !editorInstance) return;
+            
+            const query = findInput.value;
+            if (!query) return;
 
-            const doc = editorInstance.getDoc();
-            const cursor = doc.getSearchCursor(query, { line: 0, ch: 0 }, { caseFold: true });
+            const qLower = query.toLowerCase();
+            const qLen = query.length;
+            const lineCount = editorInstance.lineCount();
 
-            while (cursor.findNext()) {
-                const from = cursor.from();
-                const to = cursor.to();
-                searchMatches.push({ from, to });
-                const marker = doc.markText(from, to, { className: "cm-searching" });
-                searchMarkers.push(marker);
-            }
+            // Pemindaian baris-per-baris native tanpa addon eksternal
+            editorInstance.operation(() => {
+                for (let line = 0; line < lineCount; line++) {
+                    const lineText = editorInstance.getLine(line);
+                    const lineLower = lineText.toLowerCase();
+                    let startCol = 0;
+
+                    while ((startCol = lineLower.indexOf(qLower, startCol)) !== -1) {
+                        const from = { line: line, ch: startCol };
+                        const to = { line: line, ch: startCol + qLen };
+                        searchMatches.push({ from, to });
+                        
+                        const marker = editorInstance.markText(from, to, { className: "cm-searching" });
+                        searchMarkers.push(marker);
+                        
+                        startCol += qLen;
+                    }
+                }
+            });
 
             if (searchMatches.length > 0) {
-                if (jumpToFirst) {
-                    currentSearchIndex = 0;
-                    focusCurrentMatch();
-                } else {
-                    document.getElementById("searchMatchBadge").textContent = "1/" + searchMatches.length;
-                }
+                currentSearchIndex = 0;
+                highlightActiveMatch(!fromTyping); // Jangan paksa scroll saat user sedang mengetik
             } else {
                 document.getElementById("searchMatchBadge").textContent = "0/0";
             }
         }
 
+        function highlightActiveMatch(shouldScroll = true) {
+            if (activeMatchMarker) {
+                activeMatchMarker.clear();
+                activeMatchMarker = null;
+            }
+            if (currentSearchIndex < 0 || currentSearchIndex >= searchMatches.length) return;
+
+            const match = searchMatches[currentSearchIndex];
+            activeMatchMarker = editorInstance.markText(match.from, match.to, { className: "cm-searching-active" });
+
+            if (shouldScroll) {
+                editorInstance.scrollIntoView({ from: match.from, to: match.to }, 120);
+            }
+
+            document.getElementById("searchMatchBadge").textContent = (currentSearchIndex + 1) + "/" + searchMatches.length;
+        }
+
         function findNext() {
             if (searchMatches.length === 0) return;
             currentSearchIndex = (currentSearchIndex + 1) % searchMatches.length;
-            focusCurrentMatch();
+            highlightActiveMatch(true);
         }
 
         function findPrev() {
             if (searchMatches.length === 0) return;
             currentSearchIndex = (currentSearchIndex - 1 + searchMatches.length) % searchMatches.length;
-            focusCurrentMatch();
-        }
-
-        function focusCurrentMatch() {
-            if (currentSearchIndex < 0 || currentSearchIndex >= searchMatches.length) return;
-            const match = searchMatches[currentSearchIndex];
-
-            editorInstance.setSelection(match.from, match.to);
-            editorInstance.scrollIntoView({ from: match.from, to: match.to }, 120);
-
-            document.getElementById("searchMatchBadge").textContent = (currentSearchIndex + 1) + "/" + searchMatches.length;
+            highlightActiveMatch(true);
         }
 
         function replaceCurrent() {
@@ -1511,25 +1537,25 @@
             const match = searchMatches[currentSearchIndex];
 
             editorInstance.replaceRange(replaceText, match.from, match.to);
-            executeSearch(true);
+            executeSearch(false);
         }
 
         function replaceAll() {
             const query = document.getElementById("findInput").value;
             const replaceText = document.getElementById("replaceInput").value;
-            if (!query || !editorInstance) return;
+            if (!query || !editorInstance || searchMatches.length === 0) return;
 
-            const doc = editorInstance.getDoc();
-            const cursor = doc.getSearchCursor(query, { line: 0, ch: 0 }, { caseFold: true });
-            
-            doc.operation(() => {
-                while (cursor.findNext()) {
-                    cursor.replace(replaceText);
+            const total = searchMatches.length;
+            editorInstance.operation(() => {
+                // Ganti dari indeks belakang agar nomor baris/kolom tidak bergeser
+                for (let i = searchMatches.length - 1; i >= 0; i--) {
+                    const m = searchMatches[i];
+                    editorInstance.replaceRange(replaceText, m.from, m.to);
                 }
             });
 
             executeSearch(false);
-            showToast("Semua kata '" + query + "' diganti!", "fa-circle-check", "text-purple-400");
+            showToast(total + " kata diganti!", "fa-circle-check", "text-purple-400");
         }
 
         /* ================= AI CHUNK ASSEMBLER ================= */
