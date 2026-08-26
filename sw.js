@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gas-studio-v1';
+const CACHE_NAME = 'gas-studio-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,7 +24,6 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './icon-512.png',
   './icon-512.png',
-  // file CDN lainnya...
 ];
 
 self.addEventListener('install', (event) => {
