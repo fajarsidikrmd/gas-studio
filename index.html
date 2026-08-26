@@ -371,11 +371,11 @@
                         <i class="fa-solid fa-circle-info"></i>
                         <span>Google Cloud OAuth 2.0 Integration</span>
                     </div>
-                    <p>Mendukung autentikasi multi-akun langsung ke Google Apps Script API & Google Drive.</p>
+                    <p>Client ID Google Cloud terpasang permanen pada PWA Studio.</p>
                 </div>
                 <div class="space-y-1">
-                    <label class="font-medium text-slate-700 dark:text-slate-200">OAuth Client ID</label>
-                    <input type="text" id="settingClientId" placeholder="xxxx.apps.googleusercontent.com" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-800 dark:text-white focus:outline-none">
+                    <label class="font-medium text-slate-700 dark:text-slate-200">OAuth Client ID (Aktif)</label>
+                    <input type="text" id="settingClientId" readonly class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-500 dark:text-slate-400 cursor-not-allowed">
                 </div>
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <div>
@@ -398,7 +398,6 @@
             </div>
             <div class="p-2.5 border-t border-slate-200 dark:border-gas-darkBorder bg-slate-50 dark:bg-slate-900/50 flex items-center justify-end space-x-1.5">
                 <button onclick="closeModal('settingsModal')" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px]">Tutup</button>
-                <button onclick="saveAppSettings()" class="px-3.5 py-1.5 rounded-lg bg-gas-blue text-white text-[10px] font-semibold">Simpan</button>
             </div>
         </div>
     </div>
@@ -777,10 +776,13 @@
 
     <!-- ================= CORE JAVASCRIPT ENGINE ================= -->
     <script>
+        // GOOGLE CLOUD OAUTH 2.0 CLIENT ID DITANAMKAN LANGSUNG
+        const HARDCODED_CLIENT_ID = "1017357338226-tp9f5k2c6qg7lsk2m0v99m3r0s02c33j.apps.googleusercontent.com";
+
         const APP_STATE = {
             projectTitle: localStorage.getItem("gas_project_title") || "Pilih Proyek GAS",
             scriptId: localStorage.getItem("gas_script_id") || "",
-            clientId: localStorage.getItem("gas_oauth_client_id") || "1017357338226-tp9f5k2c6qg7lsk2m0v99m3r0s02c33j.apps.googleusercontent.com",
+            clientId: HARDCODED_CLIENT_ID,
             accessToken: localStorage.getItem("gas_access_token") || null,
             userEmail: localStorage.getItem("gas_user_email") || null,
             theme: localStorage.getItem("gas_studio_theme") || "light",
@@ -837,6 +839,9 @@
             renderChunkSlots();
             initGoogleIdentity();
 
+            const settingClientIdInput = document.getElementById("settingClientId");
+            if (settingClientIdInput) settingClientIdInput.value = HARDCODED_CLIENT_ID;
+
             if (APP_STATE.accessToken && APP_STATE.scriptId) {
                 fetchRemoteProject(true);
             }
@@ -851,10 +856,10 @@
 
         /* ================= GOOGLE IDENTITY SERVICES (GIS OAUTH 2.0) ================= */
         function initGoogleIdentity() {
-            if (window.google && APP_STATE.clientId) {
+            if (window.google) {
                 try {
                     tokenClientInstance = google.accounts.oauth2.initTokenClient({
-                        client_id: APP_STATE.clientId,
+                        client_id: HARDCODED_CLIENT_ID,
                         scope: "https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
                         callback: async (resp) => {
                             if (resp.access_token) {
@@ -930,12 +935,6 @@
                 return;
             }
 
-            if (!APP_STATE.clientId) {
-                openSettingsModal();
-                showToast("Masukkan OAuth Client ID terlebih dahulu", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
-
             if (tokenClientInstance) {
                 tokenClientInstance.requestAccessToken({ prompt: "consent" });
             } else {
@@ -944,40 +943,39 @@
             }
         }
 
-        /* ================= DRIVE PROJECT PICKER DENGAN FILTER LENGKAP ================= */
+        /* ================= DRIVE PROJECT PICKER ================= */
         async function loadDriveProjectsList(force = false) {
             const container = document.getElementById("driveProjectsContainer");
-        
+
             if (!APP_STATE.accessToken) {
                 container.innerHTML = '<div class="p-6 text-center space-y-2"><p class="text-slate-500 text-[10px]">Silakan login Google untuk memindai file proyek Anda.</p><button onclick="handleAuthAction()" class="px-3 py-1.5 rounded-lg bg-gas-blue text-white font-semibold text-[10px]">Login dengan Google</button></div>';
                 return;
             }
-        
+
             if (!force && APP_STATE.driveProjectsCache.length > 0) {
                 renderDriveProjectsList(APP_STATE.driveProjectsCache);
                 return;
             }
-        
+
             container.innerHTML = '<div class="p-6 text-center text-slate-400 text-[10px]"><i class="fa-solid fa-spinner fa-spin text-xl mb-2 text-blue-500 block"></i>Memindai seluruh proyek Google Apps Script di Google Drive...</div>';
-        
+
             try {
-                // Query mencakup Standalone Script dan file yang tidak berada di sampah
                 const q = "mimeType = 'application/vnd.google-apps.script' and trashed = false";
                 const driveUrl = "https://www.googleapis.com/drive/v3/files?q=" + encodeURIComponent(q) + 
-                                 "&fields=files(id,name,modifiedTime,owners,shared)&pageSize=100&orderBy=modifiedTime desc" +
+                                 "&fields=files(id,name,modifiedTime)&pageSize=100&orderBy=modifiedTime desc" +
                                  "&supportsAllDrives=true&includeItemsFromAllDrives=true";
                 
                 const res = await fetch(driveUrl, {
                     headers: { "Authorization": "Bearer " + APP_STATE.accessToken }
                 });
-        
+
                 if (res.status === 401) {
                     handleAuthAction();
                     throw new Error("Sesi berakhir. Silakan login kembali.");
                 }
-        
+
                 if (!res.ok) throw new Error("Gagal membaca Google Drive.");
-        
+
                 const driveData = await res.json();
                 APP_STATE.driveProjectsCache = driveData.files || [];
                 renderDriveProjectsList(APP_STATE.driveProjectsCache);
@@ -1842,17 +1840,7 @@
         }
 
         function openSettingsModal() {
-            document.getElementById("settingClientId").value = APP_STATE.clientId;
             openModal("settingsModal");
-        }
-
-        function saveAppSettings() {
-            const cid = document.getElementById("settingClientId").value.trim();
-            APP_STATE.clientId = cid;
-            localStorage.setItem("gas_oauth_client_id", cid);
-            initGoogleIdentity();
-            closeModal("settingsModal");
-            showToast("Pengaturan OAuth disimpan");
         }
 
         function initTheme() { setTheme(APP_STATE.theme); }
