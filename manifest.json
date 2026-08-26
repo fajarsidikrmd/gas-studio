@@ -1,17 +1,24 @@
 {
-  "name": "GAS Studio",
+  "name": "GAS Mobile Studio",
   "short_name": "GAS Studio",
-  "description": "Google Apps Script Cloud Manager & IDE Progressive Web App",
+  "description": "Google Apps Script Mobile IDE & Code Editor",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#020617",
-  "orientation": "any",
+  "background_color": "#0d1117",
+  "theme_color": "#1a73e8",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%2310b981'><rect width='512' height='512' rx='100' fill='%23020617'/><path d='M256 90L70 180l186 90 186-90-186-90zM70 330l186 90 186-90M70 255l186 90 186-90' stroke='%2310b981' stroke-width='35' fill='none'/></svg>",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
+      "src": "https://cdn-icons-png.flaticon.com/512/2875/2875338.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2875/2875338.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
