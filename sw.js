@@ -1,8 +1,10 @@
-const CACHE_NAME = 'gas-studio-v2';
+const CACHE_NAME = 'gas-studio-v3';
+
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './icon-512.png',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css',
@@ -16,14 +18,6 @@ const ASSETS_TO_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js',
   'https://accounts.google.com/gsi/client'
-];
-
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-512.png',
-  './icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -47,11 +41,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request).then((networkResponse) => {
         return networkResponse;
-      })
-      .catch(() => caches.match(event.request))
+      });
+    }).catch(() => caches.match('./index.html'))
   );
 });
