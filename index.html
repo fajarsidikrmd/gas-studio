@@ -52,7 +52,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CodeMirror 5 Core, Modes, & Theme -->
+    <!-- CodeMirror 5 Core, Modes, & Dracula Theme -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
 
@@ -130,7 +130,7 @@
                         <span id="syncStatusText">Siap</span>
                     </span>
                     <span class="text-slate-300 dark:text-slate-600">•</span>
-                    <span id="authStatusText" class="text-slate-400 truncate">Belum Login</span>
+                    <span id="authStatusText" class="text-slate-400 truncate">Belum Terhubung</span>
                 </div>
             </div>
         </div>
@@ -643,7 +643,7 @@
                     <i class="fa-brands fa-google text-xs"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-xs text-slate-800 dark:text-white">GAS Mobile Studio</h2>
+                    <h2 class="font-bold text-xs text-slate-800 dark:text-white">GAS Studio Mobile</h2>
                     <p class="text-[9px] text-slate-500 dark:text-slate-400">Workspace IDE</p>
                 </div>
             </div>
@@ -858,7 +858,7 @@
             } else {
                 userEmailDisplay.textContent = "Belum Terhubung";
                 userStatusSub.textContent = "Klik untuk login Gmail";
-                authStatusText.textContent = "Belum Login";
+                authStatusText.textContent = "Belum Terhubung";
                 authStatusText.className = "text-slate-400 truncate";
                 btnGoogleAuth.textContent = "Login";
                 btnGoogleAuth.className = "px-2 py-0.5 text-[10px] rounded-md bg-gas-blue text-white font-medium active:scale-95 transition shrink-0";
@@ -1435,65 +1435,6 @@
         }
 
         /* ================= FILE MANAGEMENT & TABS ================= */
-        function initCodeMirror() {
-            const textarea = document.getElementById("codeEditor");
-            editorInstance = CodeMirror.fromTextArea(textarea, {
-                lineNumbers: true,
-                mode: "htmlmixed",
-                theme: APP_STATE.theme === "dark" ? "dracula" : "default",
-                autoCloseBrackets: true,
-                matchBrackets: true,
-                styleActiveLine: true,
-                tabSize: 2,
-                indentUnit: 2,
-                lineWrapping: true,
-                viewportMargin: Infinity
-            });
-
-            editorInstance.on("cursorActivity", () => {
-                const pos = editorInstance.getCursor();
-                document.getElementById("cursorPos").textContent = `Ln ${pos.line + 1}, Col ${pos.ch + 1}`;
-                updateLineCount();
-            });
-
-            editorInstance.on("change", () => {
-                const activeFile = getActiveFile();
-                if (activeFile && activeFile.content !== editorInstance.getValue()) {
-                    activeFile.content = editorInstance.getValue();
-                    setDirty(true);
-                    updateLineCount();
-                }
-            });
-
-            loadActiveFileToEditor();
-        }
-
-        function updateLineCount() {
-            if (!editorInstance) return;
-            document.getElementById("lineCountInfo").textContent = `${editorInstance.lineCount().toLocaleString('id-ID')} Baris`;
-        }
-
-        function loadActiveFileToEditor() {
-            const activeFile = getActiveFile();
-            if (!activeFile || !editorInstance) return;
-
-            if (activeFile.type === "SERVER_JS") {
-                editorInstance.setOption("mode", "javascript");
-                document.getElementById("activeFileLang").textContent = "JavaScript (GAS)";
-            } else if (activeFile.type === "HTML") {
-                editorInstance.setOption("mode", "htmlmixed");
-                document.getElementById("activeFileLang").textContent = "HTML / CSS / JS";
-            } else if (activeFile.type === "JSON") {
-                editorInstance.setOption("mode", "application/json");
-                document.getElementById("activeFileLang").textContent = "JSON Manifest";
-            }
-
-            editorInstance.setValue(activeFile.content);
-            if (activeFile.history) editorInstance.setHistory(activeFile.history);
-            else editorInstance.clearHistory();
-            updateLineCount();
-        }
-
         function getActiveFile() {
             return APP_STATE.files.find(f => f.id === APP_STATE.activeFileId) || APP_STATE.files[0];
         }
@@ -1766,29 +1707,6 @@
             dlAnchor.setAttribute("download", `${APP_STATE.projectTitle}_backup.json`);
             dlAnchor.click();
             showToast("Backup JSON diunduh");
-        }
-
-        function toggleLogConsole(forceOpen) {
-            const drawer = document.getElementById("logConsoleDrawer");
-            const isOpen = !drawer.classList.contains("translate-y-full");
-            if (forceOpen === true || (forceOpen === undefined && !isOpen)) drawer.classList.remove("translate-y-full");
-            else drawer.classList.add("translate-y-full");
-        }
-
-        function appendLog(level, message) {
-            const container = document.getElementById("logContainer");
-            const time = new Date().toLocaleTimeString("id-ID");
-            let color = level === "ERROR" ? "text-rose-400" : level === "SUCCESS" ? "text-emerald-400" : "text-slate-300";
-            const line = document.createElement("div");
-            line.className = `${color} flex items-start space-x-1.5 leading-tight`;
-            line.innerHTML = `<span class="text-slate-500 shrink-0 font-mono text-[9px]">${time}</span><span class="font-bold shrink-0 text-[9px]">[${level}]</span><span class="break-all font-mono">${escapeHtml(message)}</span>`;
-            container.appendChild(line);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function clearLogs() {
-            document.getElementById("logContainer").innerHTML = '<div class="text-slate-500 italic">Log dibersihkan.</div>';
-            document.getElementById("logExecTime").classList.add("hidden");
         }
 
         function showToast(msg, icon = "fa-circle-check", iconColor = "text-emerald-400") {
