@@ -7,6 +7,7 @@
 
     <!-- PWA Settings & Manifest -->
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -52,7 +53,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CodeMirror 5 Core, Modes, & Dracula Theme -->
+    <!-- CodeMirror 5 Core & Dracula Theme -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
 
@@ -65,7 +66,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
 
-    <!-- Google Identity Services (GIS SDK) -->
+    <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
@@ -212,7 +213,7 @@
         </main>
 
         <!-- ================= KEYBOARD ACCESSORY BAR ================= -->
-        <div class="bg-white dark:bg-gas-darkCard border-t border-slate-200 dark:border-gas-darkBorder shrink-0 z-20 flex flex-col select-none shadow-xs">
+        <div class="bg-white dark:bg-gas-darkCard border-t border-slate-200 dark:border-gas-darkBorder shrink-0 z-20 flex flex-col select-none shadow-xs" id="virtualAccessoryWrapper">
             <div class="flex items-center px-1 py-0.5 space-x-1 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800" id="symbolAccessoryBar">
                 <button class="accessory-btn px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold border border-slate-200 dark:border-slate-700" onclick="insertSymbol('{')">{</button>
                 <button class="accessory-btn px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold border border-slate-200 dark:border-slate-700" onclick="insertSymbol('}')">}</button>
@@ -368,9 +369,9 @@
                 <div class="p-2.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-xl space-y-1 text-blue-900 dark:text-blue-200 text-[9px]">
                     <div class="font-semibold flex items-center space-x-1">
                         <i class="fa-solid fa-circle-info"></i>
-                        <span>Integrasi Resmi Google Cloud OAuth 2.0</span>
+                        <span>Google Cloud OAuth 2.0 Integration</span>
                     </div>
-                    <p>Mendukung autentikasi multi-akun langsung ke Apps Script API & Google Drive.</p>
+                    <p>Mendukung autentikasi multi-akun langsung ke Google Apps Script API & Google Drive.</p>
                 </div>
                 <div class="space-y-1">
                     <label class="font-medium text-slate-700 dark:text-slate-200">OAuth Client ID</label>
@@ -795,7 +796,7 @@
                     name: "index",
                     type: "HTML",
                     history: null,
-                    content: `<!DOCTYPE html>\n<html>\n<head>\n  <base target="_top">\n  <meta charset="utf-8">\n  <title>Aplikasi GAS</title>\n  <script src="https://cdn.tailwindcss.com"><\/script>\n</head>\n<body class="bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-4">\n  <div class="max-w-md w-full bg-white p-6 rounded-2xl shadow-sm text-center space-y-3">\n    <h1 class="text-base font-bold">GAS Mobile Studio</h1>\n    <p class="text-xs text-slate-500">Pilih proyek dari Google Drive untuk mulai bekerja.</p>\n  </div>\n</body>\n</html>`
+                    content: '<!DOCTYPE html>\n<html>\n<head>\n  <base target="_top">\n  <meta charset="utf-8">\n  <title>Aplikasi GAS</title>\n  <script src="https://cdn.tailwindcss.com"><' + '/script>\n</head>\n<body class="bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-4">\n  <div class="max-w-md w-full bg-white p-6 rounded-2xl shadow-sm text-center space-y-3">\n    <h1 class="text-base font-bold">GAS Mobile Studio</h1>\n    <p class="text-xs text-slate-500">Pilih proyek dari Google Drive untuk mulai bekerja.</p>\n  </div>\n<' + '/body>\n<' + '/html>'
                 }
             ],
             isDirty: false
@@ -808,9 +809,9 @@
         function updateAppViewportHeight() {
             if (window.visualViewport) {
                 const height = window.visualViewport.height;
-                document.documentElement.style.setProperty('--app-height', `${height}px`);
+                document.documentElement.style.setProperty('--app-height', height + 'px');
                 const appRoot = document.getElementById('appRoot');
-                if (appRoot) appRoot.style.height = `${height}px`;
+                if (appRoot) appRoot.style.height = height + 'px';
                 if (editorInstance) editorInstance.refresh();
                 window.scrollTo(0, 0);
             }
@@ -866,7 +867,7 @@
 
                                 try {
                                     const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                                        headers: { "Authorization": `Bearer ${resp.access_token}` }
+                                        headers: { "Authorization": "Bearer " + resp.access_token }
                                     });
                                     if (userRes.ok) {
                                         const userData = await userRes.json();
@@ -904,7 +905,7 @@
                 authStatusText.className = "text-emerald-600 dark:text-emerald-400 font-semibold truncate";
                 btnGoogleAuth.textContent = "Logout";
                 btnGoogleAuth.className = "px-2 py-0.5 text-[10px] rounded-md bg-rose-600 text-white font-medium active:scale-95 transition shrink-0";
-                if (picture) userAvatar.innerHTML = `<img src="${picture}" class="w-full h-full rounded-full object-cover">`;
+                if (picture) userAvatar.innerHTML = '<img src="' + picture + '" class="w-full h-full rounded-full object-cover">';
             } else {
                 userEmailDisplay.textContent = "Belum Terhubung";
                 userStatusSub.textContent = "Klik untuk login Gmail";
@@ -948,14 +949,7 @@
             const container = document.getElementById("driveProjectsContainer");
 
             if (!APP_STATE.accessToken) {
-                container.innerHTML = `
-                    <div class="p-6 text-center space-y-2">
-                        <p class="text-slate-500 text-[10px]">Silakan login Google untuk memindai file proyek Anda.</p>
-                        <button onclick="handleAuthAction()" class="px-3 py-1.5 rounded-lg bg-gas-blue text-white font-semibold text-[10px]">
-                            Login dengan Google
-                        </button>
-                    </div>
-                `;
+                container.innerHTML = '<div class="p-6 text-center space-y-2"><p class="text-slate-500 text-[10px]">Silakan login Google untuk memindai file proyek Anda.</p><button onclick="handleAuthAction()" class="px-3 py-1.5 rounded-lg bg-gas-blue text-white font-semibold text-[10px]">Login dengan Google</button></div>';
                 return;
             }
 
@@ -964,19 +958,14 @@
                 return;
             }
 
-            container.innerHTML = `
-                <div class="p-6 text-center text-slate-400 text-[10px]">
-                    <i class="fa-solid fa-spinner fa-spin text-xl mb-2 text-blue-500 block"></i>
-                    Memindai proyek Google Apps Script di Google Drive...
-                </div>
-            `;
+            container.innerHTML = '<div class="p-6 text-center text-slate-400 text-[10px]"><i class="fa-solid fa-spinner fa-spin text-xl mb-2 text-blue-500 block"></i>Memindai proyek Google Apps Script di Google Drive...</div>';
 
             try {
                 const q = "mimeType = 'application/vnd.google-apps.script' and trashed = false";
-                const driveUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,modifiedTime)&pageSize=50&orderBy=modifiedTime desc`;
+                const driveUrl = "https://www.googleapis.com/drive/v3/files?q=" + encodeURIComponent(q) + "&fields=files(id,name,modifiedTime)&pageSize=50&orderBy=modifiedTime desc";
                 
                 const res = await fetch(driveUrl, {
-                    headers: { "Authorization": `Bearer ${APP_STATE.accessToken}` }
+                    headers: { "Authorization": "Bearer " + APP_STATE.accessToken }
                 });
 
                 if (res.status === 401) {
@@ -990,12 +979,7 @@
                 APP_STATE.driveProjectsCache = driveData.files || [];
                 renderDriveProjectsList(APP_STATE.driveProjectsCache);
             } catch (err) {
-                container.innerHTML = `
-                    <div class="p-4 text-center text-rose-500 text-[10px]">
-                        <i class="fa-solid fa-triangle-exclamation text-base mb-1 block"></i>
-                        ${err.message}
-                    </div>
-                `;
+                container.innerHTML = '<div class="p-4 text-center text-rose-500 text-[10px]"><i class="fa-solid fa-triangle-exclamation text-base mb-1 block"></i>' + err.message + '</div>';
             }
         }
 
@@ -1012,24 +996,17 @@
                 const dateStr = p.modifiedTime ? new Date(p.modifiedTime).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }) : "";
                 
                 const card = document.createElement("div");
-                card.className = `p-2.5 rounded-xl border cursor-pointer transition flex items-center justify-between ${
-                    isCurrent 
+                card.className = "p-2.5 rounded-xl border cursor-pointer transition flex items-center justify-between " + 
+                    (isCurrent 
                     ? "bg-blue-50 dark:bg-blue-950/40 border-blue-500 text-blue-800 dark:text-blue-300 shadow-xs" 
-                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200"
-                }`;
+                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200");
                 
-                card.innerHTML = `
-                    <div class="flex items-center space-x-2.5 truncate">
-                        <div class="w-7 h-7 rounded-lg ${isCurrent ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-slate-800 text-blue-600'} flex items-center justify-center shrink-0 text-xs">
-                            <i class="fa-solid fa-scroll"></i>
-                        </div>
-                        <div class="truncate">
-                            <h4 class="font-semibold text-[11px] truncate">${p.name}</h4>
-                            <p class="text-[9px] text-slate-400 font-mono truncate">ID: ${p.id.substring(0, 14)}... • Update: ${dateStr}</p>
-                        </div>
-                    </div>
-                    ${isCurrent ? '<span class="text-[9px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shrink-0">Aktif</span>' : ''}
-                `;
+                card.innerHTML = '<div class="flex items-center space-x-2.5 truncate">' +
+                    '<div class="w-7 h-7 rounded-lg ' + (isCurrent ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-slate-800 text-blue-600') + ' flex items-center justify-center shrink-0 text-xs">' +
+                    '<i class="fa-solid fa-scroll"></i></div>' +
+                    '<div class="truncate"><h4 class="font-semibold text-[11px] truncate">' + p.name + '</h4>' +
+                    '<p class="text-[9px] text-slate-400 font-mono truncate">ID: ' + p.id.substring(0, 14) + '... • Update: ' + dateStr + '</p></div></div>' +
+                    (isCurrent ? '<span class="text-[9px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shrink-0">Aktif</span>' : '');
 
                 card.onclick = () => selectDriveProject(p.id, p.name);
                 container.appendChild(card);
@@ -1050,7 +1027,7 @@
 
             updateHeaderInfo();
             closeModal("projectModal");
-            showToast(`Membuka: ${projectName}...`);
+            showToast("Membuka: " + projectName + "...");
             fetchRemoteProject();
         }
 
@@ -1074,8 +1051,8 @@
 
             try {
                 if (!silent) showToast("Mengunduh seluruh file script...");
-                const response = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/content`, {
-                    headers: { "Authorization": `Bearer ${APP_STATE.accessToken}` }
+                const response = await fetch("https://script.googleapis.com/v1/projects/" + APP_STATE.scriptId + "/content", {
+                    headers: { "Authorization": "Bearer " + APP_STATE.accessToken }
                 });
 
                 if (response.status === 401) {
@@ -1100,7 +1077,7 @@
                     loadActiveFileToEditor();
                     updateFunctionDropdown();
                     setDirty(false);
-                    if (!silent) showToast(`Proyek '${APP_STATE.projectTitle}' dimuat!`, "fa-circle-check", "text-emerald-400");
+                    if (!silent) showToast("Proyek '" + APP_STATE.projectTitle + "' dimuat!", "fa-circle-check", "text-emerald-400");
                 }
             } catch (err) {
                 if (!silent) showToast(err.message, "fa-circle-exclamation", "text-rose-400");
@@ -1125,10 +1102,10 @@
                     }))
                 };
 
-                const res = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/content`, {
+                const res = await fetch("https://script.googleapis.com/v1/projects/" + APP_STATE.scriptId + "/content", {
                     method: "PUT",
                     headers: {
-                        "Authorization": `Bearer ${APP_STATE.accessToken}`,
+                        "Authorization": "Bearer " + APP_STATE.accessToken,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify(apiPayload)
@@ -1138,7 +1115,7 @@
 
                 setDirty(false);
                 showToast("Tersimpan ke Google Cloud!", "fa-circle-check", "text-emerald-400");
-                appendLog("SUCCESS", `Proyek '${APP_STATE.projectTitle}' berhasil diperbarui.`);
+                appendLog("SUCCESS", "Proyek '" + APP_STATE.projectTitle + "' berhasil diperbarui.");
             } catch (err) {
                 showToast(err.message, "fa-circle-exclamation", "text-rose-400");
                 appendLog("ERROR", "Simpan gagal: " + err.message);
@@ -1156,8 +1133,8 @@
         async function fetchDeploymentsList() {
             if (!APP_STATE.accessToken || !APP_STATE.scriptId) return;
             try {
-                const res = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/deployments`, {
-                    headers: { "Authorization": `Bearer ${APP_STATE.accessToken}` }
+                const res = await fetch("https://script.googleapis.com/v1/projects/" + APP_STATE.scriptId + "/deployments", {
+                    headers: { "Authorization": "Bearer " + APP_STATE.accessToken }
                 });
                 if (res.ok) {
                     const data = await res.json();
@@ -1179,7 +1156,7 @@
                     const desc = dep.deploymentConfig?.description || ("Versi " + (dep.deploymentConfig?.versionNumber || idx + 1));
                     const opt = document.createElement("option");
                     opt.value = dep.deploymentId;
-                    opt.textContent = `Deploy: ${desc} (${dep.deploymentId.substring(0, 10)}...)`;
+                    opt.textContent = "Deploy: " + desc + " (" + dep.deploymentId.substring(0, 10) + "...)";
                     select.appendChild(opt);
                 });
                 APP_STATE.activeDeploymentId = valid[0].deploymentId;
@@ -1199,7 +1176,7 @@
             const isNew = APP_STATE.activeDeploymentId === "CREATE_NEW";
             document.getElementById("webAppUrlDisplay").textContent = isNew 
                 ? "URL akan digenerate setelah rilis" 
-                : `https://script.google.com/macros/s/${APP_STATE.activeDeploymentId}/exec`;
+                : "https://script.google.com/macros/s/" + APP_STATE.activeDeploymentId + "/exec";
             handleDeploymentSelectionChange();
         }
 
@@ -1210,7 +1187,7 @@
 
             if (val !== "CREATE_NEW") {
                 APP_STATE.activeDeploymentId = val;
-                document.getElementById("webAppUrlDisplay").textContent = `https://script.google.com/macros/s/${val}/exec`;
+                document.getElementById("webAppUrlDisplay").textContent = "https://script.google.com/macros/s/" + val + "/exec";
                 btnText.textContent = "Perbarui (URL Tetap)";
                 btn.className = "px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-semibold flex items-center space-x-1 active:scale-95 transition";
             } else {
@@ -1236,9 +1213,9 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
 
             try {
-                const versionResp = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/versions`, {
+                const versionResp = await fetch("https://script.googleapis.com/v1/projects/" + APP_STATE.scriptId + "/versions", {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${APP_STATE.accessToken}`, "Content-Type": "application/json" },
+                    headers: { "Authorization": "Bearer " + APP_STATE.accessToken, "Content-Type": "application/json" },
                     body: JSON.stringify({ description: desc })
                 });
 
@@ -1247,23 +1224,23 @@
                 const newVersionNumber = versionData.versionNumber;
 
                 if (mode !== "CREATE_NEW") {
-                    const updateResp = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/deployments/${mode}`, {
+                    const updateResp = await fetch("https://script.googleapis.com/v1/projects/" + APP_STATE.scriptId + "/deployments/" + mode, {
                         method: "PUT",
-                        headers: { "Authorization": `Bearer ${APP_STATE.accessToken}`, "Content-Type": "application/json" },
+                        headers: { "Authorization": "Bearer " + APP_STATE.accessToken, "Content-Type": "application/json" },
                         body: JSON.stringify({ deploymentConfig: { versionNumber: newVersionNumber, description: desc } })
                     });
                     if (!updateResp.ok) throw new Error("Gagal update deployment");
                     showToast("Deployment terupdate! URL tetap sama.");
                 } else {
-                    const createResp = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/deployments`, {
+                    const createResp = await fetch("https://script.googleapis.com/v1/projects/" + APP_STATE.scriptId + "/deployments", {
                         method: "POST",
-                        headers: { "Authorization": `Bearer ${APP_STATE.accessToken}`, "Content-Type": "application/json" },
+                        headers: { "Authorization": "Bearer " + APP_STATE.accessToken, "Content-Type": "application/json" },
                         body: JSON.stringify({ versionNumber: newVersionNumber, description: desc })
                     });
                     if (!createResp.ok) throw new Error("Gagal deploy baru");
                     const newDepData = await createResp.json();
                     APP_STATE.activeDeploymentId = newDepData.deploymentId;
-                    document.getElementById("webAppUrlDisplay").textContent = `https://script.google.com/macros/s/${newDepData.deploymentId}/exec`;
+                    document.getElementById("webAppUrlDisplay").textContent = "https://script.google.com/macros/s/" + newDepData.deploymentId + "/exec";
                     showToast("Deployment baru sukses dibuat!");
                 }
 
@@ -1308,16 +1285,16 @@
         function runSelectedFunction() {
             const selectedFunc = document.getElementById("funcSelect").value;
             toggleLogConsole(true);
-            appendLog("INFO", `Menjalankan: ${selectedFunc}() ...`);
+            appendLog("INFO", "Menjalankan: " + selectedFunc + "() ...");
             const startTime = performance.now();
 
             setTimeout(() => {
                 const duration = ((performance.now() - startTime) / 1000).toFixed(2);
                 document.getElementById("logExecTime").classList.remove("hidden");
-                document.getElementById("logExecTime").textContent = `(${duration}s)`;
+                document.getElementById("logExecTime").textContent = "(" + duration + "s)";
                 const time = new Date().toLocaleTimeString("id-ID");
-                appendLog("LOG", `Logger.log: ${selectedFunc} berhasil dieksekusi pada ${time}`);
-                appendLog("SUCCESS", `Fungsi ${selectedFunc}() selesai (${duration}s)`);
+                appendLog("LOG", "Logger.log: " + selectedFunc + " berhasil dieksekusi pada " + time);
+                appendLog("SUCCESS", "Fungsi " + selectedFunc + "() selesai (" + duration + "s)");
             }, 250);
         }
 
@@ -1345,18 +1322,13 @@
                 const partNum = index + 1;
                 const slotDiv = document.createElement("div");
                 slotDiv.className = "p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-1.5";
-                slotDiv.innerHTML = `
-                    <div class="flex items-center justify-between text-[10px]">
-                        <span class="font-semibold text-slate-700 dark:text-slate-200">Chunk Part ${partNum}</span>
-                        <div class="flex items-center space-x-1">
-                            <button onclick="pasteToSlot(${index})" class="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-[9px] font-medium border border-purple-200 dark:border-purple-800">
-                                Paste Part ${partNum}
-                            </button>
-                            ${APP_STATE.chunkSlots.length > 1 ? `<button onclick="removeChunkSlot(${index})" class="p-1 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></button>` : ''}
-                        </div>
-                    </div>
-                    <textarea oninput="updateSlotContent(${index}, this.value)" rows="2" placeholder="Tempel kode Part ${partNum}..." class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 font-mono text-[10px] text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-500">${slotContent}</textarea>
-                `;
+                slotDiv.innerHTML = '<div class="flex items-center justify-between text-[10px]">' +
+                    '<span class="font-semibold text-slate-700 dark:text-slate-200">Chunk Part ' + partNum + '</span>' +
+                    '<div class="flex items-center space-x-1">' +
+                    '<button onclick="pasteToSlot(' + index + ')" class="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-[9px] font-medium border border-purple-200 dark:border-purple-800">Paste Part ' + partNum + '</button>' +
+                    (APP_STATE.chunkSlots.length > 1 ? '<button onclick="removeChunkSlot(' + index + ')" class="p-1 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></button>' : '') +
+                    '</div></div>' +
+                    '<textarea oninput="updateSlotContent(' + index + ', this.value)" rows="2" placeholder="Tempel kode Part ' + partNum + '..." class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 font-mono text-[10px] text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-500">' + slotContent + '</textarea>';
                 container.appendChild(slotDiv);
             });
         }
@@ -1371,11 +1343,11 @@
             try {
                 if (navigator.clipboard && navigator.clipboard.readText) text = await navigator.clipboard.readText();
             } catch (e) {}
-            if (!text) text = prompt(`Tempel isi Part ${index + 1}:`);
+            if (!text) text = prompt("Tempel isi Part " + (index + 1) + ":");
             if (text) {
                 APP_STATE.chunkSlots[index] = text;
                 renderChunkSlots();
-                showToast(`Part ${index + 1} ditempel!`);
+                showToast("Part " + (index + 1) + " ditempel!");
             }
         }
 
@@ -1389,7 +1361,7 @@
                 getActiveFile().content = merged;
                 setDirty(true);
                 closeModal("assemblerModal");
-                showToast(`Digabungkan ${validChunks.length} chunk!`);
+                showToast("Digabungkan " + validChunks.length + " chunk!");
             } else if (currentTab === "injector") {
                 const code = document.getElementById("injectorCodeInput").value.trim();
                 if (!code) return showToast("Kode injeksi kosong", "fa-triangle-exclamation", "text-amber-400");
@@ -1397,13 +1369,13 @@
                 let text = editorInstance.getValue();
 
                 if (target === "STYLE") {
-                    text = /<\/style>/i.test(text) ? text.replace(/<\/style>/i, `  ${code}\n</style>`) : `<style>\n${code}\n</style>\n` + text;
+                    text = /<\/style>/i.test(text) ? text.replace(/<\/style>/i, "  " + code + "\n<' + '/style>") : "<style>\n" + code + "\n<' + '/style>\n" + text;
                 } else if (target === "SCRIPT") {
-                    text = /<\/script>/i.test(text) ? text.replace(/<\/script>/i, `  ${code}\n</script>`) : text + `\n<script>\n${code}\n<\/script>`;
+                    text = /<\/script>/i.test(text) ? text.replace(/<\/script>/i, "  " + code + "\n<' + '/script>") : text + "\n<script>\n" + code + "\n<' + '/script>";
                 } else if (target === "BODY_APPEND") {
-                    text = /<\/body>/i.test(text) ? text.replace(/<\/body>/i, `  ${code}\n</body>`) : text + `\n${code}`;
+                    text = /<\/body>/i.test(text) ? text.replace(/<\/body>/i, "  " + code + "\n<' + '/body>") : text + "\n" + code;
                 } else if (target === "BODY_REPLACE") {
-                    text = text.replace(/(<body[^>]*>)[\s\S]*?(<\/body>)/i, `$1\n${code}\n$2`);
+                    text = text.replace(/(<body[^>]*>)[\s\S]*?(<\/body>)/i, "$1\n" + code + "\n$2");
                 }
 
                 editorInstance.setValue(text);
@@ -1417,10 +1389,10 @@
                 if (!funcName || !newCode) return showToast("Nama & kode baru wajib diisi", "fa-triangle-exclamation", "text-amber-400");
 
                 const currentText = editorInstance.getValue();
-                const pattern = new RegExp(`function\\s+${funcName}\\s*\\([^{]*\\{`, 'g');
+                const pattern = new RegExp("function\\s+" + funcName + "\\s*\\([^{]*\\{", 'g');
                 const match = pattern.exec(currentText);
 
-                if (!match) return showToast(`Fungsi '${funcName}' tidak ditemukan`, "fa-triangle-exclamation", "text-amber-400");
+                if (!match) return showToast("Fungsi '" + funcName + "' tidak ditemukan", "fa-triangle-exclamation", "text-amber-400");
                 
                 const startIdx = match.index;
                 const firstBrace = currentText.indexOf('{', startIdx);
@@ -1437,7 +1409,7 @@
                     getActiveFile().content = replaced;
                     setDirty(true);
                     closeModal("assemblerModal");
-                    showToast(`Fungsi '${funcName}' diganti sempurna!`);
+                    showToast("Fungsi '" + funcName + "' diganti sempurna!");
                 }
             } else if (currentTab === "url") {
                 let rawUrl = document.getElementById("importRawUrl").value.trim();
@@ -1470,10 +1442,10 @@
         function openSnippetModal() { openModal("snippetModal"); }
         function applySnippet(type) {
             let code = "";
-            if (type === "doGetWeb") code = `\nfunction doGet(e) {\n  return HtmlService.createTemplateFromFile('index').evaluate().setTitle('Web App').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);\n}\n`;
-            else if (type === "doPostJson") code = `\nfunction doPost(e) {\n  const data = JSON.parse(e.postData.contents);\n  return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: data })).setMimeType(ContentService.MimeType.JSON);\n}\n`;
-            else if (type === "sheetAppend") code = `\nfunction appendData(row) {\n  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().appendRow(row);\n}\n`;
-            else if (type === "sheetReadJson") code = `\nfunction readDataAsJson() {\n  const sheet = SpreadsheetApp.getActiveSheet();\n  const [headers, ...rows] = sheet.getDataRange().getValues();\n  return rows.map(r => Object.fromEntries(headers.map((h, i) => [h, r[i]])));\n}\n`;
+            if (type === "doGetWeb") code = "\nfunction doGet(e) {\n  return HtmlService.createTemplateFromFile('index').evaluate().setTitle('Web App').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);\n}\n";
+            else if (type === "doPostJson") code = "\nfunction doPost(e) {\n  const data = JSON.parse(e.postData.contents);\n  return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: data })).setMimeType(ContentService.MimeType.JSON);\n}\n";
+            else if (type === "sheetAppend") code = "\nfunction appendData(row) {\n  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().appendRow(row);\n}\n";
+            else if (type === "sheetReadJson") code = "\nfunction readDataAsJson() {\n  const sheet = SpreadsheetApp.getActiveSheet();\n  const [headers, ...rows] = sheet.getDataRange().getValues();\n  return rows.map(r => Object.fromEntries(headers.map((h, i) => [h, r[i]])));\n}\n";
 
             if (code && editorInstance) {
                 const doc = editorInstance.getDoc();
@@ -1502,7 +1474,7 @@
 
             editorInstance.on("cursorActivity", () => {
                 const pos = editorInstance.getCursor();
-                document.getElementById("cursorPos").textContent = `Ln ${pos.line + 1}, Col ${pos.ch + 1}`;
+                document.getElementById("cursorPos").textContent = "Ln " + (pos.line + 1) + ", Col " + (pos.ch + 1);
                 updateLineCount();
             });
 
@@ -1520,7 +1492,7 @@
 
         function updateLineCount() {
             if (!editorInstance) return;
-            document.getElementById("lineCountInfo").textContent = `${editorInstance.lineCount().toLocaleString('id-ID')} Baris`;
+            document.getElementById("lineCountInfo").textContent = editorInstance.lineCount().toLocaleString('id-ID') + " Baris";
         }
 
         function loadActiveFileToEditor() {
@@ -1567,16 +1539,15 @@
             APP_STATE.files.forEach(file => {
                 const isActive = file.id === APP_STATE.activeFileId;
                 const tab = document.createElement("div");
-                tab.className = `flex items-center space-x-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium cursor-pointer shrink-0 transition ${
-                    isActive 
+                tab.className = "flex items-center space-x-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium cursor-pointer shrink-0 transition " +
+                    (isActive 
                     ? "bg-white dark:bg-gas-darkCard text-slate-800 dark:text-white border border-slate-200 dark:border-gas-darkBorder shadow-xs font-semibold" 
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                }`;
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200");
 
                 let icon = file.type === "HTML" ? '<i class="fa-brands fa-html5 text-orange-500"></i>' : file.type === "JSON" ? '<i class="fa-solid fa-gear text-slate-400"></i>' : '<i class="fa-brands fa-js text-amber-500"></i>';
                 let ext = file.type === "HTML" ? '.html' : file.type === "JSON" ? '.json' : '.gs';
 
-                tab.innerHTML = `${icon}<span>${file.name}${ext}</span>`;
+                tab.innerHTML = icon + "<span>" + file.name + ext + "</span>";
                 tab.onclick = () => switchFile(file.id);
                 container.appendChild(tab);
             });
@@ -1589,16 +1560,19 @@
             APP_STATE.files.forEach(file => {
                 const isActive = file.id === APP_STATE.activeFileId;
                 const item = document.createElement("div");
-                item.className = `flex items-center justify-between p-1.5 rounded-lg text-[10px] cursor-pointer transition ${
-                    isActive 
+                item.className = "flex items-center justify-between p-1.5 rounded-lg text-[10px] cursor-pointer transition " +
+                    (isActive 
                     ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold border border-blue-100 dark:border-blue-900" 
-                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-                }`;
+                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800");
 
                 let iconClass = file.type === "HTML" ? "fa-brands fa-html5 text-orange-500" : file.type === "JSON" ? "fa-solid fa-gear text-slate-400" : "fa-brands fa-js text-amber-500";
                 let ext = file.type === "HTML" ? ".html" : file.type === "JSON" ? ".json" : ".gs";
 
-                item.innerHTML = `<div class="flex items-center space-x-2 truncate"><i class="${iconClass} text-xs w-3.5 text-center"></i><span class="truncate">${file.name}${ext}</span></div>`;
+                item.innerHTML = '<div class="flex items-center space-x-2 truncate"><i class="' + iconClass + ' text-xs w-3.5 text-center"></i><span class="truncate">' + file.name + ext + '</span></div>' +
+                    (file.name !== 'appsscript' ? '<div class="flex items-center space-x-1">' +
+                    '<button onclick="event.stopPropagation(); openRenameModal(\'' + file.id + '\')" class="opacity-60 hover:opacity-100 p-0.5 text-slate-400 hover:text-blue-500"><i class="fa-solid fa-pen text-[9px]"></i></button>' +
+                    '<button onclick="event.stopPropagation(); deleteFile(\'' + file.id + '\')" class="opacity-60 hover:opacity-100 p-0.5 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></button></div>' : '');
+                
                 item.onclick = () => switchFile(file.id);
                 container.appendChild(item);
             });
@@ -1619,7 +1593,7 @@
                 name: rawName,
                 type: type,
                 history: null,
-                content: type === "SERVER_JS" ? `function ${rawName.toLowerCase()}Func() {\n  // Code\n}` : `<!-- ${rawName}.html -->\n<div></div>`
+                content: type === "SERVER_JS" ? "function " + rawName.toLowerCase() + "Func() {\n  // Code\n}" : "<!-- " + rawName + ".html -->\n<div></div>"
             };
 
             APP_STATE.files.push(newFile);
@@ -1630,7 +1604,122 @@
             renderFileList();
             loadActiveFileToEditor();
             setDirty(true);
-            showToast(`File ${rawName} dibuat`);
+            showToast("File " + rawName + " dibuat");
+        }
+
+        function openRenameModal(fileId) {
+            const file = APP_STATE.files.find(f => f.id === fileId);
+            if (!file) return;
+            document.getElementById("renameFileTargetId").value = fileId;
+            document.getElementById("renameFileNameInput").value = file.name;
+            openModal("renameFileModal");
+        }
+
+        function confirmRenameFile() {
+            const fileId = document.getElementById("renameFileTargetId").value;
+            const newName = document.getElementById("renameFileNameInput").value.trim().replace(/\.[^/.]+$/, "");
+            if (!newName) return;
+            const file = APP_STATE.files.find(f => f.id === fileId);
+            if (file) {
+                file.name = newName;
+                closeModal("renameFileModal");
+                renderTabs();
+                renderFileList();
+                setDirty(true);
+                showToast("Nama file diperbarui!");
+            }
+        }
+
+        function deleteFile(fileId) {
+            if (APP_STATE.files.length <= 1) return showToast("Minimal 1 file harus ada", "fa-triangle-exclamation", "text-amber-400");
+            if (confirm("Hapus file ini?")) {
+                APP_STATE.files = APP_STATE.files.filter(f => f.id !== fileId);
+                if (APP_STATE.activeFileId === fileId) APP_STATE.activeFileId = APP_STATE.files[0].id;
+                renderTabs();
+                renderFileList();
+                loadActiveFileToEditor();
+                setDirty(true);
+                showToast("File dihapus");
+            }
+        }
+
+        /* ================= MULTI-FILE LOCAL UPLOAD ================= */
+        function triggerLocalFileInput() { document.getElementById("localFileInput").click(); }
+
+        function handleLocalFileUpload(event) {
+            const files = Array.from(event.target.files);
+            if (!files || files.length === 0) return;
+
+            if (files.length > 1) {
+                files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+                const confirmConcat = confirm("Pilihan " + files.length + " file:\n" + files.map(f => "• " + f.name).join("\n") + "\n\nGabungkan semua file ini menjadi satu ke file aktif?");
+
+                if (confirmConcat) {
+                    let loadedContents = new Array(files.length);
+                    let readCounter = 0;
+                    files.forEach((file, idx) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            loadedContents[idx] = e.target.result;
+                            readCounter++;
+                            if (readCounter === files.length) {
+                                const mergedText = loadedContents.filter(Boolean).join("\n");
+                                editorInstance.setValue(mergedText);
+                                getActiveFile().content = mergedText;
+                                setDirty(true);
+                                showToast("Digabungkan " + files.length + " file lokal!", "fa-cubes-stacked", "text-purple-400");
+                            }
+                        };
+                        reader.readAsText(file);
+                    });
+                    event.target.value = "";
+                    toggleSidebar(false);
+                    return;
+                }
+            }
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const fileNameWithExt = file.name;
+                    const lastDot = fileNameWithExt.lastIndexOf('.');
+                    const name = lastDot !== -1 ? fileNameWithExt.substring(0, lastDot) : fileNameWithExt;
+                    const ext = lastDot !== -1 ? fileNameWithExt.substring(lastDot + 1).toLowerCase() : "";
+
+                    let fileType = "SERVER_JS";
+                    if (ext === "html" || ext === "htm") fileType = "HTML";
+                    else if (ext === "json") fileType = "JSON";
+
+                    const existingIndex = APP_STATE.files.findIndex(f => f.name.toLowerCase() === name.toLowerCase() && f.type === fileType);
+
+                    if (existingIndex !== -1) {
+                        APP_STATE.files[existingIndex].content = content;
+                        APP_STATE.activeFileId = APP_STATE.files[existingIndex].id;
+                        showToast("File " + name + "." + ext + " dimuat ulang!");
+                    } else {
+                        const newFile = {
+                            id: "file_imported_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+                            name: name,
+                            type: fileType,
+                            history: null,
+                            content: content
+                        };
+                        APP_STATE.files.push(newFile);
+                        APP_STATE.activeFileId = newFile.id;
+                        showToast("File " + fileNameWithExt + " dibuka!");
+                    }
+
+                    renderTabs();
+                    renderFileList();
+                    loadActiveFileToEditor();
+                    setDirty(true);
+                };
+                reader.readAsText(file);
+            });
+
+            event.target.value = "";
+            toggleSidebar(false);
         }
 
         /* ================= VIRTUAL KEYBOARD & TOUCH PROTECT ================= */
@@ -1789,7 +1878,7 @@
         function toggleTheme() {
             const currentTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
             setTheme(currentTheme === "dark" ? "light" : "dark");
-            showToast(`Tema ${APP_STATE.theme === 'dark' ? 'Gelap' : 'Terang'} aktif`);
+            showToast("Tema " + (APP_STATE.theme === 'dark' ? 'Gelap' : 'Terang') + " aktif");
         }
 
         function changeFontSize(size) {
@@ -1805,14 +1894,14 @@
             dlAnchor.href = URL.createObjectURL(blob);
             dlAnchor.download = file.name + ext;
             dlAnchor.click();
-            showToast(`File ${file.name}${ext} diunduh!`);
+            showToast("File " + file.name + ext + " diunduh!");
         }
 
         function exportProjectZip() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(APP_STATE.files.map(f => ({ name: f.name, type: f.type, content: f.content })), null, 2));
             const dlAnchor = document.createElement("a");
             dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `${APP_STATE.projectTitle}_backup.json`);
+            dlAnchor.setAttribute("download", APP_STATE.projectTitle + "_backup.json");
             dlAnchor.click();
             showToast("Backup JSON diunduh");
         }
@@ -1829,8 +1918,8 @@
             const time = new Date().toLocaleTimeString("id-ID");
             let color = level === "ERROR" ? "text-rose-400" : level === "SUCCESS" ? "text-emerald-400" : "text-slate-300";
             const line = document.createElement("div");
-            line.className = `${color} flex items-start space-x-1.5 leading-tight`;
-            line.innerHTML = `<span class="text-slate-500 shrink-0 font-mono text-[9px]">${time}</span><span class="font-bold shrink-0 text-[9px]">[${level}]</span><span class="break-all font-mono">${escapeHtml(message)}</span>`;
+            line.className = color + " flex items-start space-x-1.5 leading-tight";
+            line.innerHTML = '<span class="text-slate-500 shrink-0 font-mono text-[9px]">' + time + '</span><span class="font-bold shrink-0 text-[9px]">[' + level + ']</span><span class="break-all font-mono">' + escapeHtml(message) + '</span>';
             container.appendChild(line);
             container.scrollTop = container.scrollHeight;
         }
@@ -1844,7 +1933,7 @@
             const toast = document.getElementById("toastNotification");
             document.getElementById("toastMsg").textContent = msg;
             const iconEl = document.getElementById("toastIcon");
-            iconEl.className = `fa-solid ${icon} ${iconColor}`;
+            iconEl.className = "fa-solid " + icon + " " + iconColor;
             toast.classList.remove("opacity-0", "-translate-y-12", "pointer-events-none");
             toast.classList.add("opacity-100", "translate-y-0");
             setTimeout(() => {
