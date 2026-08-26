@@ -128,7 +128,7 @@
                         <span id="syncStatusText">Tersinkron</span>
                     </span>
                     <span class="text-slate-300 dark:text-slate-600">•</span>
-                    <span id="authStatusText" class="text-emerald-600 dark:text-emerald-400 font-semibold truncate">GAS Bridge</span>
+                    <span id="authStatusText" class="text-emerald-600 dark:text-emerald-400 font-semibold truncate">GAS Bridge (OK)</span>
                 </div>
             </div>
         </div>
@@ -676,7 +676,7 @@
             <div class="p-3 border-b border-slate-200 dark:border-gas-darkBorder flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                 <div class="flex items-center space-x-1.5">
                     <i class="fa-solid fa-gear text-slate-600 dark:text-slate-300"></i>
-                    <h3 class="font-bold text-xs text-slate-800 dark:text-white">Pengaturan GAS Bridge & Tampilan</h3>
+                    <h3 class="font-bold text-xs text-slate-800 dark:text-white">Pengaturan Server Bridge & Tampilan</h3>
                 </div>
                 <button onclick="closeModal('settingsModal')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -736,6 +736,7 @@
             scriptId: localStorage.getItem("gas_script_id") || "1DemoScriptIdForMobileTestingOnly",
             bridgeUrl: localStorage.getItem("gas_bridge_url") || "",
             bridgePin: localStorage.getItem("gas_bridge_pin") || "123456",
+            bridgeEmail: localStorage.getItem("gas_bridge_email") || "GAS Bridge Server",
             theme: localStorage.getItem("gas_studio_theme") || "light",
             activeDeploymentId: "AKfycbz_DemoDeploymentId",
             deploymentsList: [],
@@ -811,6 +812,7 @@
             initTheme();
             initCodeMirror();
             loadStateFromStorage();
+            restoreBridgeUI();
             renderTabs();
             renderFileList();
             updateHeaderInfo();
@@ -823,6 +825,25 @@
                 testBridgeConnection(true);
             }
         });
+
+        /* ================= PERSISTENT BRIDGE STATE RESTORE ================= */
+        function restoreBridgeUI() {
+            const userEmailDisplay = document.getElementById("userEmailDisplay");
+            const userStatusSub = document.getElementById("userStatusSub");
+            const authStatusText = document.getElementById("authStatusText");
+
+            if (APP_STATE.bridgeUrl) {
+                userEmailDisplay.textContent = APP_STATE.bridgeEmail;
+                userStatusSub.textContent = "Terhubung • Sesi Permanen";
+                authStatusText.textContent = "GAS Bridge (OK)";
+                authStatusText.className = "text-emerald-600 dark:text-emerald-400 font-semibold truncate";
+            } else {
+                userEmailDisplay.textContent = "Belum Terhubung";
+                userStatusSub.textContent = "Masukkan URL di Pengaturan";
+                authStatusText.textContent = "Belum Disetel";
+                authStatusText.className = "text-slate-400 truncate";
+            }
+        }
 
         /* ================= SERVICE WORKER / PWA ================= */
         if ('serviceWorker' in navigator) {
@@ -848,7 +869,8 @@
 
             const response = await fetch(APP_STATE.bridgeUrl, {
                 method: "POST",
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                redirect: "follow"
             });
 
             if (!response.ok) {
@@ -865,15 +887,24 @@
         async function testBridgeConnection(silent = false) {
             try {
                 const res = await callBridge("PING");
-                document.getElementById("userEmailDisplay").textContent = res.email || "GAS Bridge";
+                const email = res.email || "GAS Bridge";
+                APP_STATE.bridgeEmail = email;
+                localStorage.setItem("gas_bridge_email", email);
+
+                document.getElementById("userEmailDisplay").textContent = email;
                 document.getElementById("userStatusSub").textContent = "Terhubung • Sesi Permanen";
                 document.getElementById("authStatusText").textContent = "GAS Bridge (OK)";
-                if (!silent) showToast("Bridge Terhubung: " + res.email, "fa-circle-check", "text-emerald-400");
+                document.getElementById("authStatusText").className = "text-emerald-600 dark:text-emerald-400 font-semibold truncate";
+
+                if (!silent) showToast("Bridge Terhubung: " + email, "fa-circle-check", "text-emerald-400");
                 fetchDeploymentsList();
             } catch (err) {
-                document.getElementById("userStatusSub").textContent = "Gagal terhubung";
-                document.getElementById("authStatusText").textContent = "Bridge Offline";
-                if (!silent) showToast(err.message, "fa-circle-exclamation", "text-rose-400");
+                if (!silent) {
+                    document.getElementById("userStatusSub").textContent = "Gagal terhubung";
+                    document.getElementById("authStatusText").textContent = "Bridge Offline";
+                    document.getElementById("authStatusText").className = "text-rose-500 font-semibold truncate";
+                    showToast(err.message, "fa-circle-exclamation", "text-rose-400");
+                }
             }
         }
 
