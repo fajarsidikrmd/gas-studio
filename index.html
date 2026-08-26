@@ -944,37 +944,40 @@
             }
         }
 
-        /* ================= DRIVE PROJECT PICKER ================= */
+        /* ================= DRIVE PROJECT PICKER DENGAN FILTER LENGKAP ================= */
         async function loadDriveProjectsList(force = false) {
             const container = document.getElementById("driveProjectsContainer");
-
+        
             if (!APP_STATE.accessToken) {
                 container.innerHTML = '<div class="p-6 text-center space-y-2"><p class="text-slate-500 text-[10px]">Silakan login Google untuk memindai file proyek Anda.</p><button onclick="handleAuthAction()" class="px-3 py-1.5 rounded-lg bg-gas-blue text-white font-semibold text-[10px]">Login dengan Google</button></div>';
                 return;
             }
-
+        
             if (!force && APP_STATE.driveProjectsCache.length > 0) {
                 renderDriveProjectsList(APP_STATE.driveProjectsCache);
                 return;
             }
-
-            container.innerHTML = '<div class="p-6 text-center text-slate-400 text-[10px]"><i class="fa-solid fa-spinner fa-spin text-xl mb-2 text-blue-500 block"></i>Memindai proyek Google Apps Script di Google Drive...</div>';
-
+        
+            container.innerHTML = '<div class="p-6 text-center text-slate-400 text-[10px]"><i class="fa-solid fa-spinner fa-spin text-xl mb-2 text-blue-500 block"></i>Memindai seluruh proyek Google Apps Script di Google Drive...</div>';
+        
             try {
+                // Query mencakup Standalone Script dan file yang tidak berada di sampah
                 const q = "mimeType = 'application/vnd.google-apps.script' and trashed = false";
-                const driveUrl = "https://www.googleapis.com/drive/v3/files?q=" + encodeURIComponent(q) + "&fields=files(id,name,modifiedTime)&pageSize=50&orderBy=modifiedTime desc";
+                const driveUrl = "https://www.googleapis.com/drive/v3/files?q=" + encodeURIComponent(q) + 
+                                 "&fields=files(id,name,modifiedTime,owners,shared)&pageSize=100&orderBy=modifiedTime desc" +
+                                 "&supportsAllDrives=true&includeItemsFromAllDrives=true";
                 
                 const res = await fetch(driveUrl, {
                     headers: { "Authorization": "Bearer " + APP_STATE.accessToken }
                 });
-
+        
                 if (res.status === 401) {
                     handleAuthAction();
                     throw new Error("Sesi berakhir. Silakan login kembali.");
                 }
-
+        
                 if (!res.ok) throw new Error("Gagal membaca Google Drive.");
-
+        
                 const driveData = await res.json();
                 APP_STATE.driveProjectsCache = driveData.files || [];
                 renderDriveProjectsList(APP_STATE.driveProjectsCache);
