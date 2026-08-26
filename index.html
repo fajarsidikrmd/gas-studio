@@ -109,7 +109,7 @@
             -webkit-user-select: none;
             touch-action: manipulation;
         }
-        .accessory-btn:active { transform: scale(0.93); }
+        .accessory-btn:active { transform: scale(0.92); }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 8px); }
     </style>
 </head>
@@ -194,7 +194,7 @@
 
     <!-- ================= VIRTUAL CODING ACCESSORY BAR ================= -->
     <div class="bg-white dark:bg-gas-darkCard border-t border-slate-200 dark:border-gas-darkBorder shrink-0 z-20 flex flex-col select-none shadow-xs">
-        <!-- Row 1: Code Symbols (Retains Keyboard Focus via preventDefault) -->
+        <!-- Row 1: Code Symbols -->
         <div class="flex items-center px-1 py-0.5 space-x-1 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800" id="symbolAccessoryBar">
             <button class="accessory-btn px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold border border-slate-200 dark:border-slate-700" onclick="insertSymbol('{')">{</button>
             <button class="accessory-btn px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold border border-slate-200 dark:border-slate-700" onclick="insertSymbol('}')">}</button>
@@ -444,7 +444,7 @@
 
         <div class="p-2.5 mx-2.5 mt-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <div class="flex items-center space-x-2 truncate">
-                <div id="userAvatar" class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                <div id="userAvatar" class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0 overflow-hidden">
                     <i class="fa-solid fa-user"></i>
                 </div>
                 <div class="truncate leading-tight">
@@ -814,7 +814,6 @@
 
   <script>
     function renderSampleAlert() {
-      // Test chainable mock backend call
       google.script.run
         .withSuccessHandler(function(res) {
           alert("Server Response: " + JSON.stringify(res));
@@ -899,6 +898,7 @@ function testFunction() {
             initTheme();
             initCodeMirror();
             loadStateFromStorage();
+            restoreAuthSession();
             renderTabs();
             renderFileList();
             updateHeaderInfo();
@@ -916,6 +916,53 @@ function testFunction() {
                     .then((reg) => console.log('PWA ServiceWorker registered:', reg.scope))
                     .catch((err) => console.error('PWA ServiceWorker registration failed:', err));
             });
+        }
+
+        /* ================= AUTHENTICATION & SESSION RESTORE ================= */
+        function restoreAuthSession() {
+            const token = localStorage.getItem("gas_access_token");
+            const expiresAt = Number(localStorage.getItem("gas_token_expires_at") || 0);
+            const email = localStorage.getItem("gas_user_email");
+
+            if (token && Date.now() < expiresAt) {
+                APP_STATE.accessToken = token;
+                APP_STATE.userEmail = email;
+                updateAuthUI();
+                fetchDeploymentsList();
+            } else if (token && Date.now() >= expiresAt) {
+                if (APP_STATE.clientId) {
+                    setTimeout(() => requestFreshToken(), 1000);
+                }
+            }
+        }
+
+        function updateAuthUI() {
+            const authStatusText = document.getElementById("authStatusText");
+            const userEmailDisplay = document.getElementById("userEmailDisplay");
+            const userStatusSub = document.getElementById("userStatusSub");
+            const btnGoogleAuth = document.getElementById("btnGoogleAuth");
+            const userAvatar = document.getElementById("userAvatar");
+            const picture = localStorage.getItem("gas_user_picture");
+
+            if (APP_STATE.accessToken) {
+                authStatusText.textContent = "GAS Cloud";
+                authStatusText.className = "text-emerald-600 dark:text-emerald-400 font-semibold truncate";
+                userEmailDisplay.textContent = APP_STATE.userEmail || "Akun Terhubung";
+                userStatusSub.textContent = "Izin Script API Aktif";
+                btnGoogleAuth.textContent = "Logout";
+                btnGoogleAuth.className = "px-2 py-0.5 text-[10px] rounded-md bg-rose-600 text-white font-medium active:scale-95 transition shrink-0";
+                if (picture) {
+                    userAvatar.innerHTML = `<img src="${picture}" class="w-full h-full rounded-full object-cover">`;
+                }
+            } else {
+                authStatusText.textContent = "Demo";
+                authStatusText.className = "text-slate-400 truncate";
+                userEmailDisplay.textContent = "Belum Terhubung";
+                userStatusSub.textContent = "Klik untuk login Gmail";
+                btnGoogleAuth.textContent = "Login";
+                btnGoogleAuth.className = "px-2 py-0.5 text-[10px] rounded-md bg-gas-blue text-white font-medium active:scale-95 transition shrink-0";
+                userAvatar.innerHTML = '<i class="fa-solid fa-user"></i>';
+            }
         }
 
         /* ================= THEME MANAGER (DARK / LIGHT) ================= */
@@ -1009,7 +1056,6 @@ function testFunction() {
 
             editorInstance.setValue(activeFile.content);
 
-            // Restore Undo/Redo stack if available, else clear
             if (activeFile.history) {
                 editorInstance.setHistory(activeFile.history);
             } else {
@@ -1049,11 +1095,10 @@ function testFunction() {
             }
         }
 
-        /* ================= VIRTUAL ACCESSORY BAR (PREVENT KEYBOARD LOSS) ================= */
+        /* ================= VIRTUAL ACCESSORY BAR (TOUCH-SAFE) ================= */
         function setupAccessoryBarFocusProtection() {
             document.querySelectorAll('.accessory-btn').forEach(btn => {
                 btn.addEventListener('mousedown', e => e.preventDefault());
-                btn.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
             });
         }
 
@@ -1066,6 +1111,8 @@ function testFunction() {
             const pairs = {'{': 1, '(': 1, '[': 1, '"': 1, "'": 1, '`': 1, '<': 1};
             if (pairs[symbol]) {
                 doc.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
+            } else {
+                doc.setCursor({ line: cursor.line, ch: cursor.ch + symbol.length });
             }
             editorInstance.focus();
         }
@@ -1076,73 +1123,75 @@ function testFunction() {
             editorInstance.focus();
         }
 
-        function editorUndo() { if (editorInstance) editorInstance.undo(); }
-        function editorRedo() { if (editorInstance) editorInstance.redo(); }
-
-        /* ================= SUPER PASTE (ASYNC CLIPBOARD API) ================= */
-        async function executeSuperPaste(appendToEnd = false) {
-            try {
-                if (!navigator.clipboard || !navigator.clipboard.readText) {
-                    const fallback = prompt(appendToEnd ? "Tempel kode yang ingin disambung di akhir:" : "Tempel kode yang ingin dimasukkan:");
-                    if (fallback) {
-                        if (appendToEnd) {
-                            const doc = editorInstance.getDoc();
-                            const lastLine = doc.lastLine();
-                            const lastLineContent = doc.getLine(lastLine);
-                            doc.replaceRange("\n" + fallback, { line: lastLine, ch: lastLineContent.length });
-                        } else {
-                            const doc = editorInstance.getDoc();
-                            const cursor = doc.getCursor();
-                            doc.replaceRange(fallback, cursor);
-                        }
-                        setDirty(true);
-                        showToast(`Berhasil menempel ${fallback.length} karakter!`);
-                    }
-                    return;
-                }
-
-                const text = await navigator.clipboard.readText();
-                if (!text) {
-                    showToast("Papan klip kosong", "fa-triangle-exclamation", "text-amber-400");
-                    return;
-                }
-
-                if (appendToEnd) {
-                    const doc = editorInstance.getDoc();
-                    const lastLine = doc.lastLine();
-                    const lastLineContent = doc.getLine(lastLine);
-                    doc.replaceRange("\n" + text, { line: lastLine, ch: lastLineContent.length });
-                    showToast(`Disambung ${text.length} karakter di akhir!`, "fa-circle-down", "text-emerald-400");
-                } else {
-                    const doc = editorInstance.getDoc();
-                    const cursor = doc.getCursor();
-                    doc.replaceRange(text, cursor);
-                    showToast(`Ditempel ${text.length} karakter!`, "fa-paste", "text-emerald-400");
-                }
-
+        function editorUndo() { 
+            if (editorInstance) {
+                editorInstance.undo();
                 editorInstance.focus();
-                setDirty(true);
-            } catch (err) {
-                showToast("Izin clipboard ditolak: " + err.message, "fa-circle-exclamation", "text-rose-400");
             }
+        }
+        
+        function editorRedo() { 
+            if (editorInstance) {
+                editorInstance.redo();
+                editorInstance.focus();
+            }
+        }
+
+        /* ================= SUPER PASTE (WITH ROBUST FALLBACK) ================= */
+        async function executeSuperPaste(appendToEnd = false) {
+            let text = "";
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    text = await navigator.clipboard.readText();
+                }
+            } catch (err) {
+                console.warn("Clipboard API permission blocked, switching to prompt:", err);
+            }
+
+            if (!text) {
+                text = prompt(appendToEnd ? "Tempel kode yang ingin disambung di akhir:" : "Tempel kode yang ingin dimasukkan:");
+            }
+
+            if (!text) return;
+
+            if (appendToEnd) {
+                const doc = editorInstance.getDoc();
+                const lastLine = doc.lastLine();
+                const lastLineContent = doc.getLine(lastLine);
+                doc.replaceRange("\n" + text, { line: lastLine, ch: lastLineContent.length });
+                showToast(`Disambung ${text.length} karakter di akhir!`, "fa-circle-down", "text-emerald-400");
+            } else {
+                const doc = editorInstance.getDoc();
+                const cursor = doc.getCursor();
+                doc.replaceRange(text, cursor);
+                showToast(`Ditempel ${text.length} karakter!`, "fa-paste", "text-emerald-400");
+            }
+
+            editorInstance.focus();
+            setDirty(true);
         }
 
         async function pasteToTextarea(elementId) {
+            let text = "";
             try {
-                if (!navigator.clipboard || !navigator.clipboard.readText) {
-                    const fallback = prompt("Tempel teks/kode:");
-                    if (fallback) document.getElementById(elementId).value = fallback;
-                    return;
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    text = await navigator.clipboard.readText();
                 }
-                const text = await navigator.clipboard.readText();
+            } catch (err) {
+                console.warn("Clipboard read blocked, switching to prompt:", err);
+            }
+
+            if (!text) {
+                text = prompt("Tempel teks/kode disini:");
+            }
+
+            if (text) {
                 document.getElementById(elementId).value = text;
                 showToast("Berhasil ditempel!");
-            } catch (err) {
-                showToast("Gagal membaca clipboard: " + err.message, "fa-circle-exclamation", "text-rose-400");
             }
         }
 
-        /* ================= SMART FUNCTION REPLACER (BRACKET BALANCE COUNTER) ================= */
+        /* ================= SMART FUNCTION REPLACER ================= */
         function replaceFunctionWithBracketCounter(sourceCode, functionName, newFunctionCode) {
             const escapedName = functionName.replace(/[$]/g, '\\$');
             const pattern = new RegExp(`(?:(?:async\\s+)?function\\s+${escapedName}\\s*\\(|(?:const|let|var)\\s+${escapedName}\\s*=\\s*(?:async\\s*)?(?:function\\s*\\(|\\([^)]*\\)\\s*=>|[a-zA-Z0-9_$]+\\s*=>))`, 'g');
@@ -1153,19 +1202,13 @@ function testFunction() {
             while ((match = pattern.exec(sourceCode)) !== null) {
                 const matchIdx = match.index;
                 
-                // Skip if inside single-line comment //
                 const lineStart = sourceCode.lastIndexOf('\n', matchIdx);
                 const lineTextBefore = sourceCode.substring(lineStart === -1 ? 0 : lineStart + 1, matchIdx);
-                if (lineTextBefore.includes('//')) {
-                    continue;
-                }
+                if (lineTextBefore.includes('//')) continue;
                 
-                // Skip if inside block comment /* ... */
                 const lastBlockOpen = sourceCode.lastIndexOf('/*', matchIdx);
                 const lastBlockClose = sourceCode.lastIndexOf('*/', matchIdx);
-                if (lastBlockOpen > lastBlockClose) {
-                    continue;
-                }
+                if (lastBlockOpen > lastBlockClose) continue;
 
                 foundMatch = match;
                 break;
@@ -1188,7 +1231,6 @@ function testFunction() {
                 const char = sourceCode[currentIndex];
                 const prevChar = sourceCode[currentIndex - 1];
 
-                // Calculate backslash escaping precisely
                 let backslashCount = 0;
                 let bIdx = currentIndex - 1;
                 while (bIdx >= 0 && sourceCode[bIdx] === '\\') {
@@ -1327,22 +1369,23 @@ function testFunction() {
         }
 
         async function pasteToSlot(index) {
+            let text = "";
             try {
-                if (!navigator.clipboard || !navigator.clipboard.readText) {
-                    const fallback = prompt(`Tempel isi Part ${index + 1}:`);
-                    if (fallback) {
-                        APP_STATE.chunkSlots[index] = fallback;
-                        renderChunkSlots();
-                        showToast(`Part ${index + 1} berhasil diisi!`);
-                    }
-                    return;
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    text = await navigator.clipboard.readText();
                 }
-                const text = await navigator.clipboard.readText();
+            } catch (err) {
+                console.warn("Clipboard read blocked, switching to prompt:", err);
+            }
+
+            if (!text) {
+                text = prompt(`Tempel isi Part ${index + 1}:`);
+            }
+
+            if (text) {
                 APP_STATE.chunkSlots[index] = text;
                 renderChunkSlots();
                 showToast(`Part ${index + 1} ditempel (${text.length} char)!`);
-            } catch (err) {
-                showToast("Gagal membaca clipboard: " + err.message, "fa-circle-exclamation", "text-rose-400");
             }
         }
 
@@ -1566,7 +1609,6 @@ function testFunction() {
         function switchFile(fileId) {
             if (APP_STATE.activeFileId === fileId) return;
 
-            // Save undo history of currently active file before switching
             const currentFile = getActiveFile();
             if (currentFile && editorInstance) {
                 currentFile.history = editorInstance.getHistory();
@@ -1913,26 +1955,42 @@ function testFunction() {
             document.getElementById("logExecTime").classList.add("hidden");
         }
 
-        /* ================= GOOGLE IDENTITY (OAUTH 2.0) ================= */
+        /* ================= GOOGLE IDENTITY (OAUTH 2.0 WITH PROFILE FETCH) ================= */
         function initGoogleIdentity() {
             if (window.google && APP_STATE.clientId) {
                 try {
                     tokenClientInstance = google.accounts.oauth2.initTokenClient({
                         client_id: APP_STATE.clientId,
-                        scope: "https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/drive.readonly",
+                        scope: "https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email",
                         error_callback: (err) => {
                             if (err.type === "interaction_required") {
                                 tokenClientInstance.requestAccessToken({ prompt: "consent" });
                             }
                         },
-                        callback: (resp) => {
+                        callback: async (resp) => {
                             if (resp.access_token) {
+                                const expiresIn = Number(resp.expires_in || 3600);
+                                const expiresAt = Date.now() + (expiresIn * 1000);
                                 APP_STATE.accessToken = resp.access_token;
-                                document.getElementById("authStatusText").textContent = "GAS Cloud";
-                                document.getElementById("userEmailDisplay").textContent = "Akun Gmail Aktif";
-                                document.getElementById("userStatusSub").textContent = "Izin Script API Aktif";
-                                document.getElementById("btnGoogleAuth").textContent = "Logout";
-                                document.getElementById("btnGoogleAuth").className = "px-2 py-0.5 text-[10px] rounded-md bg-rose-600 text-white font-medium";
+                                
+                                localStorage.setItem("gas_access_token", resp.access_token);
+                                localStorage.setItem("gas_token_expires_at", expiresAt.toString());
+
+                                try {
+                                    const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                                        headers: { "Authorization": `Bearer ${resp.access_token}` }
+                                    });
+                                    if (userRes.ok) {
+                                        const userData = await userRes.json();
+                                        APP_STATE.userEmail = userData.email;
+                                        localStorage.setItem("gas_user_email", userData.email);
+                                        if (userData.picture) {
+                                            localStorage.setItem("gas_user_picture", userData.picture);
+                                        }
+                                    }
+                                } catch(e) {}
+
+                                updateAuthUI();
                                 showToast("Login Google Berhasil!", "fa-circle-check", "text-emerald-400");
                                 fetchDeploymentsList();
                             }
@@ -1945,11 +2003,12 @@ function testFunction() {
         function handleAuthAction() {
             if (APP_STATE.accessToken) {
                 APP_STATE.accessToken = null;
-                document.getElementById("authStatusText").textContent = "Demo";
-                document.getElementById("userEmailDisplay").textContent = "Belum Terhubung";
-                document.getElementById("userStatusSub").textContent = "Klik untuk login Gmail";
-                document.getElementById("btnGoogleAuth").textContent = "Login";
-                document.getElementById("btnGoogleAuth").className = "px-2 py-0.5 text-[10px] rounded-md bg-gas-blue text-white font-medium";
+                APP_STATE.userEmail = null;
+                localStorage.removeItem("gas_access_token");
+                localStorage.removeItem("gas_token_expires_at");
+                localStorage.removeItem("gas_user_email");
+                localStorage.removeItem("gas_user_picture");
+                updateAuthUI();
                 showToast("Logout selesai");
                 return;
             }
@@ -2014,7 +2073,7 @@ function testFunction() {
             }
         }
 
-        /* ================= DEPLOYMENT MANAGER (FETCH & UPDATE) ================= */
+        /* ================= DEPLOYMENT MANAGER ================= */
         document.getElementById("btnDeploy").onclick = () => {
             fetchDeploymentsList();
             updateDeployModalUI();
@@ -2177,7 +2236,7 @@ function testFunction() {
             }
         }
 
-        /* ================= LIVE PREVIEW (WITH SCRIPTLET & CHAINABLE BUILDER) ================= */
+        /* ================= LIVE PREVIEW ================= */
         function openLivePreviewModal() {
             document.getElementById("previewModal").classList.remove("hidden");
             refreshLivePreview();
@@ -2191,7 +2250,6 @@ function testFunction() {
                 return;
             }
 
-            // Parse GAS Scriptlets <?!= include('...') ?> recursively & handle file extensions
             let compiledContent = htmlFile.content;
             let maxPasses = 5;
             while (maxPasses-- > 0 && /<\?!=?\s*(?:include|HtmlService\.createHtmlOutputFromFile\s*\(\s*['"]([^'"]+)['"]\s*\)\.getContent\(\))\s*(?:\(\s*['"]([^'"]+)['"]\s*\))?\s*;?\s*\?>/i.test(compiledContent)) {
@@ -2266,6 +2324,7 @@ function testFunction() {
                 const doc = editorInstance.getDoc();
                 const cursor = doc.getCursor();
                 doc.replaceRange(codeToInsert, cursor);
+                doc.setCursor({ line: cursor.line, ch: cursor.ch + codeToInsert.length });
                 editorInstance.focus();
                 closeModal("snippetModal");
                 showToast("Snippet disisipkan!");
