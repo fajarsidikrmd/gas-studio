@@ -65,15 +65,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
 
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
     <style>
         ::-webkit-scrollbar { width: 3px; height: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 3px; }
         
-        /* Light CodeMirror Defaults */
         .CodeMirror {
             height: 100% !important;
             font-family: 'Fira Code', monospace !important;
@@ -91,7 +87,6 @@
         .CodeMirror-activeline-background { background: #f1f5f9; }
         .CodeMirror-cursor { border-left: 2px solid #1a73e8; }
 
-        /* Dark CodeMirror Overrides */
         .dark .CodeMirror {
             background-color: #0d1117 !important;
             color: #e6edf3 !important;
@@ -133,19 +128,17 @@
                         <span id="syncStatusText">Tersinkron</span>
                     </span>
                     <span class="text-slate-300 dark:text-slate-600">•</span>
-                    <span id="authStatusText" class="text-slate-400 truncate">Demo</span>
+                    <span id="authStatusText" class="text-emerald-600 dark:text-emerald-400 font-semibold truncate">GAS Bridge</span>
                 </div>
             </div>
         </div>
 
-        <!-- Right: Actions (Theme, Functions, Run, Save, Deploy, Assembler) -->
+        <!-- Right: Actions (Theme, Functions, Run, Save, Deploy) -->
         <div class="flex items-center space-x-1">
-            <!-- Theme Toggle Button -->
             <button onclick="toggleTheme()" title="Ubah Tema Gelap/Terang" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-amber-500 dark:text-amber-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs active:scale-95 transition">
                 <i id="themeIcon" class="fa-solid fa-moon"></i>
             </button>
 
-            <!-- Function Selector Dropdown (Dynamically Scanned) -->
             <div class="relative">
                 <select id="funcSelect" class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[10px] rounded-lg px-1.5 py-1 border border-slate-200 dark:border-slate-700 focus:outline-none appearance-none pr-3.5 max-w-[65px] sm:max-w-[110px] truncate font-medium">
                     <option value="doGet">doGet</option>
@@ -154,18 +147,15 @@
                 <i class="fa-solid fa-caret-down text-[8px] text-slate-400 absolute right-1 top-2 pointer-events-none"></i>
             </div>
 
-            <!-- Run Button -->
             <button id="btnRunCode" title="Jalankan Fungsi" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-[10px] active:scale-95 transition">
                 <i class="fa-solid fa-play"></i>
             </button>
 
-            <!-- Save Button -->
-            <button id="btnSaveCode" title="Simpan ke GAS (Ctrl/Cmd+S)" class="h-7 px-2 rounded-lg bg-gas-blue hover:bg-gas-blueHover text-white flex items-center space-x-1 text-[10px] font-semibold shadow-xs active:scale-95 transition">
+            <button id="btnSaveCode" title="Simpan ke GAS Cloud (Ctrl/Cmd+S)" class="h-7 px-2 rounded-lg bg-gas-blue hover:bg-gas-blueHover text-white flex items-center space-x-1 text-[10px] font-semibold shadow-xs active:scale-95 transition">
                 <i class="fa-solid fa-cloud-arrow-up text-[9px]"></i>
                 <span>Simpan</span>
             </button>
 
-            <!-- Deploy Button -->
             <button id="btnDeploy" title="Kelola Deployment" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center text-[10px] active:scale-95 transition">
                 <i class="fa-solid fa-rocket"></i>
             </button>
@@ -174,7 +164,6 @@
 
     <!-- ================= FILE TABS STRIP ================= -->
     <nav class="h-7 bg-slate-100 dark:bg-gas-dark border-b border-slate-200 dark:border-gas-darkBorder flex items-center px-1.5 space-x-1 overflow-x-auto no-scrollbar shrink-0 z-10" id="tabsContainer">
-        <!-- Dynamic Tabs Rendered via JS -->
     </nav>
 
     <!-- ================= MAIN WORKSPACE (EDITOR) ================= -->
@@ -194,7 +183,6 @@
 
     <!-- ================= VIRTUAL CODING ACCESSORY BAR ================= -->
     <div class="bg-white dark:bg-gas-darkCard border-t border-slate-200 dark:border-gas-darkBorder shrink-0 z-20 flex flex-col select-none shadow-xs">
-        <!-- Row 1: Code Symbols -->
         <div class="flex items-center px-1 py-0.5 space-x-1 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800" id="symbolAccessoryBar">
             <button class="accessory-btn px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold border border-slate-200 dark:border-slate-700" onclick="insertSymbol('{')">{</button>
             <button class="accessory-btn px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold border border-slate-200 dark:border-slate-700" onclick="insertSymbol('}')">}</button>
@@ -217,7 +205,6 @@
             <button class="accessory-btn px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold border border-slate-200 dark:border-slate-700" onclick="insertSymbol('!')">!</button>
         </div>
 
-        <!-- Row 2: Super Paste, Keywords, Tab, Undo/Redo -->
         <div class="flex items-center justify-between px-1.5 py-0.5 bg-slate-50 dark:bg-slate-900 text-[10px]">
             <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
                 <button class="accessory-btn px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-semibold border border-purple-200 dark:border-purple-800 flex items-center space-x-1 shrink-0" onclick="executeSuperPaste(false)" title="Tempel langsung dari Clipboard">
@@ -287,7 +274,6 @@
     <!-- ================= MODAL: AI CHUNK ASSEMBLER & MERGER ================= -->
     <div id="assemblerModal" class="fixed inset-0 bg-slate-900/40 dark:bg-black/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3">
         <div class="bg-white dark:bg-gas-darkCard border border-slate-200 dark:border-gas-darkBorder rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-xl">
-            <!-- Header -->
             <div class="p-3 border-b border-slate-200 dark:border-gas-darkBorder flex items-center justify-between bg-slate-50 dark:bg-slate-900/60 shrink-0">
                 <div class="flex items-center space-x-2">
                     <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white text-[10px]">
@@ -303,7 +289,6 @@
                 </button>
             </div>
 
-            <!-- Nav Tabs -->
             <div class="flex border-b border-slate-200 dark:border-gas-darkBorder bg-slate-50/50 dark:bg-slate-900/40 shrink-0 overflow-x-auto no-scrollbar text-[11px] font-medium">
                 <button id="tabBtnSlots" onclick="switchAssemblerTab('slots')" class="flex-1 min-w-[95px] py-2 text-center text-purple-700 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 font-semibold">
                     <i class="fa-solid fa-layer-group mr-1"></i>Slot Chunk
@@ -319,14 +304,11 @@
                 </button>
             </div>
 
-            <!-- TAB 1: SLOTS BUFFER -->
             <div id="tabContentSlots" class="p-3 overflow-y-auto space-y-2 flex-1">
                 <div class="p-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/50 rounded-xl text-purple-800 dark:text-purple-200 text-[10px]">
                     Salin potongan (Part 1, 2, 3) dari AI, lalu klik <strong>"Paste Part"</strong>. Sistem menggabungkannya seketika ke file aktif.
                 </div>
-
                 <div id="slotsContainer" class="space-y-2"></div>
-
                 <div class="flex items-center justify-between pt-1">
                     <button onclick="addChunkSlot()" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-purple-700 dark:text-purple-300 text-[10px] font-medium flex items-center space-x-1 border border-purple-200 dark:border-purple-800/40">
                         <i class="fa-solid fa-plus text-[9px]"></i>
@@ -338,82 +320,61 @@
                 </div>
             </div>
 
-            <!-- TAB 2: INJEKTOR SECTION TAG -->
             <div id="tabContentInjector" class="p-3 overflow-y-auto space-y-2 flex-1 hidden text-[11px]">
                 <p class="text-slate-500 dark:text-slate-400 text-[10px]">Sisipkan kode ke tag spesifik di file <strong id="injectorActiveFileName" class="text-slate-800 dark:text-white">index.html</strong> tanpa scroll:</p>
-
                 <div class="space-y-1">
                     <label class="font-medium text-slate-700 dark:text-slate-300 text-[10px]">Target Injeksi:</label>
                     <div class="grid grid-cols-2 gap-1.5">
                         <label class="cursor-pointer">
                             <input type="radio" name="injectTarget" value="STYLE" checked class="peer hidden">
-                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">
-                                🎨 Masukkan ke &lt;style&gt;
-                            </div>
+                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">🎨 Masukkan ke &lt;style&gt;</div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="injectTarget" value="SCRIPT" class="peer hidden">
-                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">
-                                ⚡ Masukkan ke &lt;script&gt;
-                            </div>
+                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">⚡ Masukkan ke &lt;script&gt;</div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="injectTarget" value="BODY_APPEND" class="peer hidden">
-                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">
-                                📑 Tambah ke &lt;body&gt;
-                            </div>
+                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">📑 Tambah ke &lt;body&gt;</div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="injectTarget" value="BODY_REPLACE" class="peer hidden">
-                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">
-                                🔄 Ganti Total &lt;body&gt;
-                            </div>
+                            <div class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-950/30 text-center text-slate-700 dark:text-slate-300 text-[10px]">🔄 Ganti Total &lt;body&gt;</div>
                         </label>
                     </div>
                 </div>
-
                 <div class="space-y-1">
                     <div class="flex items-center justify-between text-[10px]">
                         <label class="text-slate-700 dark:text-slate-300 font-medium">Potongan Kode:</label>
-                        <button onclick="pasteToTextarea('injectorCodeInput')" class="text-purple-600 dark:text-purple-400">
-                            <i class="fa-solid fa-paste mr-0.5"></i>Paste dari Clipboard
-                        </button>
+                        <button onclick="pasteToTextarea('injectorCodeInput')" class="text-purple-600 dark:text-purple-400"><i class="fa-solid fa-paste mr-0.5"></i>Paste dari Clipboard</button>
                     </div>
                     <textarea id="injectorCodeInput" rows="5" placeholder="Tempel potongan kode disini..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 font-mono text-[10px] text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
                 </div>
             </div>
 
-            <!-- TAB 3: SMART FUNCTION REPLACER (With Bracket Counter) -->
             <div id="tabContentReplacer" class="p-3 overflow-y-auto space-y-2 flex-1 hidden text-[11px]">
                 <p class="text-slate-500 dark:text-slate-400 text-[10px]">Ganti satu blok fungsi JavaScript di file ribuan baris tanpa resiko memotong kode:</p>
-
                 <div class="space-y-1">
                     <label class="font-medium text-slate-700 dark:text-slate-300 text-[10px]">Nama Fungsi:</label>
                     <input type="text" id="replacerFuncName" placeholder="Contoh: renderTable / calculateTotal" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-500">
                 </div>
-
                 <div class="space-y-1">
                     <div class="flex items-center justify-between text-[10px]">
                         <label class="text-slate-700 dark:text-slate-300 font-medium">Kode Fungsi Baru:</label>
-                        <button onclick="pasteToTextarea('replacerCodeInput')" class="text-purple-600 dark:text-purple-400">
-                            <i class="fa-solid fa-paste mr-0.5"></i>Paste dari Clipboard
-                        </button>
+                        <button onclick="pasteToTextarea('replacerCodeInput')" class="text-purple-600 dark:text-purple-400"><i class="fa-solid fa-paste mr-0.5"></i>Paste dari Clipboard</button>
                     </div>
                     <textarea id="replacerCodeInput" rows="5" placeholder="function renderTable() { ... }" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 font-mono text-[10px] text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
                 </div>
             </div>
 
-            <!-- TAB 4: IMPORT VIA URL (With GitHub RAW Transformer) -->
             <div id="tabContentUrl" class="p-3 overflow-y-auto space-y-2 flex-1 hidden text-[11px]">
                 <p class="text-slate-500 dark:text-slate-400 text-[10px]">Tarik kode ribuan baris langsung dari URL raw publik tanpa batasan clipboard HP:</p>
-
                 <div class="space-y-1">
                     <label class="font-medium text-slate-700 dark:text-slate-300 text-[10px]">URL File / GitHub Blob:</label>
                     <input type="url" id="importRawUrl" placeholder="https://github.com/user/repo/blob/... atau raw link" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-500">
                 </div>
             </div>
 
-            <!-- Modal Footer -->
             <div class="p-2.5 border-t border-slate-200 dark:border-gas-darkBorder bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between shrink-0">
                 <button onclick="closeModal('assemblerModal')" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-medium">Tutup</button>
                 <button id="btnExecuteAssembler" onclick="executeAssemblerAction()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[10px] font-semibold shadow-xs active:scale-95 transition flex items-center space-x-1">
@@ -430,11 +391,11 @@
         <div class="p-3 border-b border-slate-200 dark:border-gas-darkBorder flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
             <div class="flex items-center space-x-2">
                 <div class="w-7 h-7 rounded-lg bg-gas-blue flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                    <i class="fa-brands fa-google text-xs"></i>
+                    <i class="fa-solid fa-bolt text-xs"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-xs text-slate-800 dark:text-white">GAS Studio</h2>
-                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Workspace Editor</p>
+                    <h2 class="font-bold text-xs text-slate-800 dark:text-white">GAS Studio Mobile</h2>
+                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Bridge Edition (Permanen)</p>
                 </div>
             </div>
             <button onclick="toggleSidebar(false)" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
@@ -444,16 +405,16 @@
 
         <div class="p-2.5 mx-2.5 mt-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <div class="flex items-center space-x-2 truncate">
-                <div id="userAvatar" class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0 overflow-hidden">
-                    <i class="fa-solid fa-user"></i>
+                <div id="userAvatar" class="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                    <i class="fa-solid fa-server"></i>
                 </div>
                 <div class="truncate leading-tight">
-                    <p id="userEmailDisplay" class="text-[10px] font-semibold text-slate-800 dark:text-white truncate">Belum Terhubung</p>
-                    <p id="userStatusSub" class="text-[9px] text-slate-500 dark:text-slate-400">Klik untuk login Gmail</p>
+                    <p id="userEmailDisplay" class="text-[10px] font-semibold text-slate-800 dark:text-white truncate">GAS Bridge Server</p>
+                    <p id="userStatusSub" class="text-[9px] text-emerald-600 dark:text-emerald-400">Status: Sesi Permanen</p>
                 </div>
             </div>
-            <button id="btnGoogleAuth" onclick="handleAuthAction()" class="px-2 py-0.5 text-[10px] rounded-md bg-gas-blue text-white font-medium active:scale-95 transition shrink-0">
-                Login
+            <button onclick="testBridgeConnection()" class="px-2 py-0.5 text-[10px] rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-medium active:scale-95 transition shrink-0">
+                Ping
             </button>
         </div>
 
@@ -487,7 +448,7 @@
             </div>
             <button onclick="openSettingsModal()" class="w-full text-left hover:text-slate-900 dark:hover:text-white flex items-center space-x-1 py-1 px-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">
                 <i class="fa-solid fa-gear text-[10px]"></i>
-                <span>Pengaturan & Integrasi</span>
+                <span>Pengaturan Server Bridge & Tema</span>
             </button>
         </div>
     </aside>
@@ -557,7 +518,7 @@
         </div>
     </div>
 
-    <!-- ================= MODAL: LIVE PREVIEW (With Chainable google.script.run) ================= -->
+    <!-- ================= MODAL: LIVE PREVIEW ================= -->
     <div id="previewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex flex-col">
         <div class="h-10 bg-white dark:bg-gas-darkCard border-b border-slate-200 dark:border-gas-darkBorder px-3 flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-1.5">
@@ -669,7 +630,7 @@
             <div class="flex items-center justify-between border-b border-slate-200 dark:border-gas-darkBorder pb-2">
                 <div class="flex items-center space-x-1.5">
                     <i class="fa-solid fa-rocket text-emerald-600 dark:text-emerald-400"></i>
-                    <h3 class="font-bold text-xs text-slate-800 dark:text-white">Deployment Web App</h3>
+                    <h3 class="font-bold text-xs text-slate-800 dark:text-white">Deployment Web App (Bridge)</h3>
                 </div>
                 <button onclick="closeModal('deployModal')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -709,27 +670,31 @@
         </div>
     </div>
 
-    <!-- ================= MODAL: SETTINGS & GOOGLE OAUTH ================= -->
+    <!-- ================= MODAL: SETTINGS (GAS BRIDGE & THEME) ================= -->
     <div id="settingsModal" class="fixed inset-0 bg-slate-900/40 dark:bg-black/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3">
         <div class="bg-white dark:bg-gas-darkCard border border-slate-200 dark:border-gas-darkBorder rounded-2xl w-full max-w-md max-h-[85vh] overflow-hidden shadow-xl flex flex-col">
             <div class="p-3 border-b border-slate-200 dark:border-gas-darkBorder flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                 <div class="flex items-center space-x-1.5">
                     <i class="fa-solid fa-gear text-slate-600 dark:text-slate-300"></i>
-                    <h3 class="font-bold text-xs text-slate-800 dark:text-white">Pengaturan API & Tema</h3>
+                    <h3 class="font-bold text-xs text-slate-800 dark:text-white">Pengaturan GAS Bridge & Tampilan</h3>
                 </div>
                 <button onclick="closeModal('settingsModal')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-3 overflow-y-auto space-y-3 flex-1 text-[10px] text-slate-600 dark:text-slate-300">
-                <div class="p-2.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-xl space-y-1 text-blue-900 dark:text-blue-200 text-[9px]">
+                <div class="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-xl space-y-1 text-emerald-900 dark:text-emerald-200 text-[9px]">
                     <div class="font-semibold flex items-center space-x-1">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <span>Integrasi Resmi Akun Google</span>
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Koneksi Server Bridge Pribadi</span>
                     </div>
-                    <p>Aktifkan Apps Script API di GCP & masukkan OAuth 2.0 Client ID untuk sinkronisasi cloud.</p>
+                    <p>Sesi permanen tanpa batas waktu. Tempel URL Web App dari file <code>Bridge.gs</code> Anda.</p>
                 </div>
                 <div class="space-y-1">
-                    <label class="font-medium text-slate-700 dark:text-slate-200">OAuth Client ID</label>
-                    <input type="text" id="settingClientId" placeholder="xxxx.apps.googleusercontent.com" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-800 dark:text-white focus:outline-none">
+                    <label class="font-medium text-slate-700 dark:text-slate-200">Bridge Web App URL</label>
+                    <input type="url" id="settingBridgeUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-800 dark:text-white focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="font-medium text-slate-700 dark:text-slate-200">PIN Keamanan (Bridge Secret PIN)</label>
+                    <input type="password" id="settingBridgePin" placeholder="Default: 123456" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-800 dark:text-white focus:outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <div>
@@ -768,10 +733,9 @@
         /* ================= STATE MANAGEMENT ================= */
         const APP_STATE = {
             projectTitle: "MyGASProject",
-            scriptId: "1DemoScriptIdForMobileTestingOnly",
-            clientId: localStorage.getItem("gas_oauth_client_id") || "",
-            accessToken: null,
-            userEmail: null,
+            scriptId: localStorage.getItem("gas_script_id") || "1DemoScriptIdForMobileTestingOnly",
+            bridgeUrl: localStorage.getItem("gas_bridge_url") || "",
+            bridgePin: localStorage.getItem("gas_bridge_pin") || "123456",
             theme: localStorage.getItem("gas_studio_theme") || "light",
             activeDeploymentId: "AKfycbz_DemoDeploymentId",
             deploymentsList: [],
@@ -800,27 +764,13 @@
     <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto text-xl font-bold text-white">
       ⚡
     </div>
-    <h1 class="text-lg font-bold text-slate-800">GAS Mobile Web App</h1>
-    <p class="text-slate-500 text-xs">Web app ini dibangun dan disuntikkan langsung dari smartphone!</p>
+    <h1 class="text-lg font-bold text-slate-800">GAS Mobile Studio</h1>
+    <p class="text-slate-500 text-xs">Bridge Edition: Kelola backend & frontend langsung dari HP!</p>
     
     <div class="p-2.5 bg-emerald-50 rounded-xl text-xs font-mono text-emerald-700 border border-emerald-200">
       Status Server: Online (doGet OK)
     </div>
-    
-    <button onclick="renderSampleAlert()" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 font-semibold text-xs text-white shadow-xs transition">
-      Klik Aksi Interaktif
-    </button>
   </div>
-
-  <script>
-    function renderSampleAlert() {
-      google.script.run
-        .withSuccessHandler(function(res) {
-          alert("Server Response: " + JSON.stringify(res));
-        })
-        .testFunction();
-    }
-  <\/script>
 </body>
 </html>`
                 },
@@ -829,58 +779,21 @@
                     name: "Code",
                     type: "SERVER_JS",
                     history: null,
-                    content: `/**
- * Google Apps Script Web App Endpoint
- * Dibuat via GAS Mobile Studio
- */
-function doGet(e) {
-  Logger.log("Menerima request GET: " + JSON.stringify(e));
-  return HtmlService.createTemplateFromFile('index')
-    .evaluate()
-    .setTitle('Aplikasi Mobile GAS')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    Logger.log("Payload diterima: " + JSON.stringify(data));
-    return ContentService.createTextOutput(JSON.stringify({
-      status: "success",
-      message: "Data berhasil diproses",
-      received: data
-    })).setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({
-      status: "error",
-      message: err.message
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function testFunction() {
-  const time = new Date().toLocaleString("id-ID");
-  Logger.log("testFunction dijalankan: " + time);
-  return "Sukses dari Server: " + time;
-}`
+                    content: `function doGet(e) {\n  return HtmlService.createTemplateFromFile('index')\n    .evaluate()\n    .setTitle('Aplikasi Mobile GAS')\n    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);\n}\n\nfunction doPost(e) {\n  return ContentService.createTextOutput(JSON.stringify({ status: 'ok' })).setMimeType(ContentService.MimeType.JSON);\n}`
                 },
                 {
                     id: "file_appsscript_json",
                     name: "appsscript",
                     type: "JSON",
                     history: null,
-                    content: `{\n  "timeZone": "Asia/Jakarta",\n  "dependencies": {},\n  "exceptionLogging": "STACKDRIVER",\n  "runtimeVersion": "V8",\n  "webapp": {\n    "executeAs": "USER_DEPLOYING",\n    "access": "ANYONE_ANONYMOUS"\n  }\n}`
+                    content: `{\n  "timeZone": "Asia/Jakarta",\n  "dependencies": {},\n  "exceptionLogging": "STACKDRIVER",\n  "runtimeVersion": "V8"\n}`
                 }
             ],
-            logs: [],
             isDirty: false
         };
 
         let editorInstance = null;
-        let tokenClientInstance = null;
 
-        /* ================= DEBOUNCE UTILITY ================= */
         function debounce(func, wait) {
             let timeout;
             return function(...args) {
@@ -898,78 +811,74 @@ function testFunction() {
             initTheme();
             initCodeMirror();
             loadStateFromStorage();
-            restoreAuthSession();
             renderTabs();
             renderFileList();
             updateHeaderInfo();
             updateFunctionDropdown();
             setupAccessoryBarFocusProtection();
             setupKeyboardShortcuts();
-            initGoogleIdentity();
             renderChunkSlots();
+            
+            if (APP_STATE.bridgeUrl) {
+                testBridgeConnection(true);
+            }
         });
 
-        /* ================= SERVICE WORKER / PWA REGISTRATION ================= */
+        /* ================= SERVICE WORKER / PWA ================= */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then((reg) => console.log('PWA ServiceWorker registered:', reg.scope))
-                    .catch((err) => console.error('PWA ServiceWorker registration failed:', err));
+                    .catch((err) => console.error('PWA SW failed:', err));
             });
         }
 
-        /* ================= AUTHENTICATION & SESSION RESTORE ================= */
-        function restoreAuthSession() {
-            const token = localStorage.getItem("gas_access_token");
-            const expiresAt = Number(localStorage.getItem("gas_token_expires_at") || 0);
-            const email = localStorage.getItem("gas_user_email");
+        /* ================= BRIDGE API CALL WRAPPER ================= */
+        async function callBridge(action, extraPayload = {}) {
+            if (!APP_STATE.bridgeUrl) {
+                openSettingsModal();
+                throw new Error("Bridge Web App URL belum diisi. Masukkan URL di Pengaturan!");
+            }
 
-            if (token && Date.now() < expiresAt) {
-                APP_STATE.accessToken = token;
-                APP_STATE.userEmail = email;
-                updateAuthUI();
+            const payload = Object.assign({
+                action: action,
+                scriptId: APP_STATE.scriptId,
+                pin: APP_STATE.bridgePin
+            }, extraPayload);
+
+            const response = await fetch(APP_STATE.bridgeUrl, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error ${response.status} dari Bridge.`);
+            }
+
+            const data = await response.json();
+            if (data.status === "error") {
+                throw new Error(data.message || "Gagal memproses request di Bridge.");
+            }
+            return data;
+        }
+
+        async function testBridgeConnection(silent = false) {
+            try {
+                const res = await callBridge("PING");
+                document.getElementById("userEmailDisplay").textContent = res.email || "GAS Bridge";
+                document.getElementById("userStatusSub").textContent = "Terhubung • Sesi Permanen";
+                document.getElementById("authStatusText").textContent = "GAS Bridge (OK)";
+                if (!silent) showToast("Bridge Terhubung: " + res.email, "fa-circle-check", "text-emerald-400");
                 fetchDeploymentsList();
-            } else if (token && Date.now() >= expiresAt) {
-                if (APP_STATE.clientId) {
-                    setTimeout(() => requestFreshToken(), 1000);
-                }
+            } catch (err) {
+                document.getElementById("userStatusSub").textContent = "Gagal terhubung";
+                document.getElementById("authStatusText").textContent = "Bridge Offline";
+                if (!silent) showToast(err.message, "fa-circle-exclamation", "text-rose-400");
             }
         }
 
-        function updateAuthUI() {
-            const authStatusText = document.getElementById("authStatusText");
-            const userEmailDisplay = document.getElementById("userEmailDisplay");
-            const userStatusSub = document.getElementById("userStatusSub");
-            const btnGoogleAuth = document.getElementById("btnGoogleAuth");
-            const userAvatar = document.getElementById("userAvatar");
-            const picture = localStorage.getItem("gas_user_picture");
-
-            if (APP_STATE.accessToken) {
-                authStatusText.textContent = "GAS Cloud";
-                authStatusText.className = "text-emerald-600 dark:text-emerald-400 font-semibold truncate";
-                userEmailDisplay.textContent = APP_STATE.userEmail || "Akun Terhubung";
-                userStatusSub.textContent = "Izin Script API Aktif";
-                btnGoogleAuth.textContent = "Logout";
-                btnGoogleAuth.className = "px-2 py-0.5 text-[10px] rounded-md bg-rose-600 text-white font-medium active:scale-95 transition shrink-0";
-                if (picture) {
-                    userAvatar.innerHTML = `<img src="${picture}" class="w-full h-full rounded-full object-cover">`;
-                }
-            } else {
-                authStatusText.textContent = "Demo";
-                authStatusText.className = "text-slate-400 truncate";
-                userEmailDisplay.textContent = "Belum Terhubung";
-                userStatusSub.textContent = "Klik untuk login Gmail";
-                btnGoogleAuth.textContent = "Login";
-                btnGoogleAuth.className = "px-2 py-0.5 text-[10px] rounded-md bg-gas-blue text-white font-medium active:scale-95 transition shrink-0";
-                userAvatar.innerHTML = '<i class="fa-solid fa-user"></i>';
-            }
-        }
-
-        /* ================= THEME MANAGER (DARK / LIGHT) ================= */
-        function initTheme() {
-            setTheme(APP_STATE.theme);
-        }
-
+        /* ================= THEME MANAGER ================= */
+        function initTheme() { setTheme(APP_STATE.theme); }
         function setTheme(theme) {
             APP_STATE.theme = theme;
             localStorage.setItem("gas_studio_theme", theme);
@@ -980,15 +889,15 @@ function testFunction() {
             if (theme === "dark") {
                 html.classList.add("dark");
                 html.classList.remove("light");
-                if (icon) { icon.className = "fa-solid fa-sun"; }
-                if (selectSetting) { selectSetting.value = "dark"; }
-                if (editorInstance) { editorInstance.setOption("theme", "dracula"); }
+                if (icon) icon.className = "fa-solid fa-sun";
+                if (selectSetting) selectSetting.value = "dark";
+                if (editorInstance) editorInstance.setOption("theme", "dracula");
             } else {
                 html.classList.remove("dark");
                 html.classList.add("light");
-                if (icon) { icon.className = "fa-solid fa-moon"; }
-                if (selectSetting) { selectSetting.value = "light"; }
-                if (editorInstance) { editorInstance.setOption("theme", "default"); }
+                if (icon) icon.className = "fa-solid fa-moon";
+                if (selectSetting) selectSetting.value = "light";
+                if (editorInstance) editorInstance.setOption("theme", "default");
             }
         }
 
@@ -1095,7 +1004,7 @@ function testFunction() {
             }
         }
 
-        /* ================= VIRTUAL ACCESSORY BAR (TOUCH-SAFE) ================= */
+        /* ================= ACCESSORY BAR ================= */
         function setupAccessoryBarFocusProtection() {
             document.querySelectorAll('.accessory-btn').forEach(btn => {
                 btn.addEventListener('mousedown', e => e.preventDefault());
@@ -1137,7 +1046,7 @@ function testFunction() {
             }
         }
 
-        /* ================= SUPER PASTE (WITH ROBUST FALLBACK) ================= */
+        /* ================= SUPER PASTE ================= */
         async function executeSuperPaste(appendToEnd = false) {
             let text = "";
             try {
@@ -1145,7 +1054,7 @@ function testFunction() {
                     text = await navigator.clipboard.readText();
                 }
             } catch (err) {
-                console.warn("Clipboard API permission blocked, switching to prompt:", err);
+                console.warn("Clipboard blocked, prompt fallback:", err);
             }
 
             if (!text) {
@@ -1178,7 +1087,7 @@ function testFunction() {
                     text = await navigator.clipboard.readText();
                 }
             } catch (err) {
-                console.warn("Clipboard read blocked, switching to prompt:", err);
+                console.warn("Clipboard blocked, prompt fallback:", err);
             }
 
             if (!text) {
@@ -1201,7 +1110,6 @@ function testFunction() {
 
             while ((match = pattern.exec(sourceCode)) !== null) {
                 const matchIdx = match.index;
-                
                 const lineStart = sourceCode.lastIndexOf('\n', matchIdx);
                 const lineTextBefore = sourceCode.substring(lineStart === -1 ? 0 : lineStart + 1, matchIdx);
                 if (lineTextBefore.includes('//')) continue;
@@ -1257,15 +1165,10 @@ function testFunction() {
                         braceCount--;
                     }
                 } else if (inString) {
-                    if (char === stringChar && !isEscaped) {
-                        inString = false;
-                    }
+                    if (char === stringChar && !isEscaped) inString = false;
                 } else if (inComment) {
-                    if (commentType === '//' && char === '\n') {
-                        inComment = false;
-                    } else if (commentType === '/*' && char === '/' && prevChar === '*' && !isEscaped) {
-                        inComment = false;
-                    }
+                    if (commentType === '//' && char === '\n') inComment = false;
+                    else if (commentType === '/*' && char === '/' && prevChar === '*' && !isEscaped) inComment = false;
                 }
                 currentIndex++;
             }
@@ -1278,7 +1181,6 @@ function testFunction() {
             return null;
         }
 
-        /* ================= RAW URL TRANSFORMER ================= */
         function transformToRawUrl(url) {
             if (url.includes('github.com') && url.includes('/blob/')) {
                 return url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
@@ -1289,7 +1191,7 @@ function testFunction() {
             return url;
         }
 
-        /* ================= AI CHUNK ASSEMBLER LOGIC ================= */
+        /* ================= AI CHUNK ASSEMBLER ================= */
         function openAssemblerModal() {
             document.getElementById("injectorActiveFileName").textContent = getActiveFile().name + (getActiveFile().type === "HTML" ? ".html" : ".gs");
             openModal("assemblerModal");
@@ -1364,24 +1266,16 @@ function testFunction() {
             showToast("Slot dibersihkan");
         }
 
-        function updateSlotContent(index, val) {
-            APP_STATE.chunkSlots[index] = val;
-        }
+        function updateSlotContent(index, val) { APP_STATE.chunkSlots[index] = val; }
 
         async function pasteToSlot(index) {
             let text = "";
             try {
-                if (navigator.clipboard && navigator.clipboard.readText) {
-                    text = await navigator.clipboard.readText();
-                }
+                if (navigator.clipboard && navigator.clipboard.readText) text = await navigator.clipboard.readText();
             } catch (err) {
-                console.warn("Clipboard read blocked, switching to prompt:", err);
+                console.warn(err);
             }
-
-            if (!text) {
-                text = prompt(`Tempel isi Part ${index + 1}:`);
-            }
-
+            if (!text) text = prompt(`Tempel isi Part ${index + 1}:`);
             if (text) {
                 APP_STATE.chunkSlots[index] = text;
                 renderChunkSlots();
@@ -1398,14 +1292,12 @@ function testFunction() {
                     showToast("Slot chunk masih kosong", "fa-triangle-exclamation", "text-amber-400");
                     return;
                 }
-
                 const assembledCode = validChunks.join("\n");
                 editorInstance.setValue(assembledCode);
                 getActiveFile().content = assembledCode;
                 setDirty(true);
                 closeModal("assemblerModal");
                 showToast(`Digabungkan ${validChunks.length} chunk!`, "fa-cubes-stacked", "text-purple-400");
-                appendLog("SUCCESS", `Assembler: ${validChunks.length} slot chunk disatukan.`);
             } 
             else if (currentTab === "injector") {
                 const code = document.getElementById("injectorCodeInput").value.trim();
@@ -1481,7 +1373,6 @@ function testFunction() {
                     setDirty(true);
                     closeModal("assemblerModal");
                     showToast(`Fungsi '${funcName}' diganti sempurna!`, "fa-arrows-rotate", "text-emerald-400");
-                    appendLog("SUCCESS", `Smart Replacer: Fungsi '${funcName}' diperbarui dengan aman.`);
                 } else {
                     showToast(`Fungsi '${funcName}' tidak ditemukan`, "fa-triangle-exclamation", "text-amber-400");
                 }
@@ -1492,7 +1383,6 @@ function testFunction() {
                     showToast("URL wajib diisi", "fa-triangle-exclamation", "text-amber-400");
                     return;
                 }
-
                 rawUrl = transformToRawUrl(rawUrl);
                 showToast("Mengunduh dari URL...");
                 fetch(rawUrl)
@@ -1513,10 +1403,8 @@ function testFunction() {
             }
         }
 
-        /* ================= MULTI-FILE CONCATENATE ================= */
-        function triggerLocalFileInput() {
-            document.getElementById("localFileInput").click();
-        }
+        /* ================= MULTI-FILE LOCAL UPLOAD ================= */
+        function triggerLocalFileInput() { document.getElementById("localFileInput").click(); }
 
         function handleLocalFileUpload(event) {
             const files = Array.from(event.target.files);
@@ -1524,18 +1412,13 @@ function testFunction() {
 
             if (files.length > 1) {
                 files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-
                 const confirmConcat = confirm(`Pilihan ${files.length} file:\n` + files.map(f => `• ${f.name}`).join("\n") + "\n\nGabungkan semua file ini menjadi satu ke file aktif?");
 
                 if (confirmConcat) {
                     let loadedContents = new Array(files.length);
                     let readCounter = 0;
-
                     files.forEach((file, idx) => {
                         const reader = new FileReader();
-                        reader.onerror = () => {
-                            showToast(`Gagal membaca file: ${file.name}`, "fa-triangle-exclamation", "text-rose-500");
-                        };
                         reader.onload = (e) => {
                             loadedContents[idx] = e.target.result;
                             readCounter++;
@@ -1549,7 +1432,6 @@ function testFunction() {
                         };
                         reader.readAsText(file);
                     });
-
                     event.target.value = "";
                     toggleSidebar(false);
                     return;
@@ -1558,7 +1440,6 @@ function testFunction() {
 
             files.forEach(file => {
                 const reader = new FileReader();
-                reader.onerror = () => showToast(`Gagal membaca ${file.name}`, "fa-triangle-exclamation", "text-rose-500");
                 reader.onload = function(e) {
                     const content = e.target.result;
                     const fileNameWithExt = file.name;
@@ -1608,11 +1489,8 @@ function testFunction() {
 
         function switchFile(fileId) {
             if (APP_STATE.activeFileId === fileId) return;
-
             const currentFile = getActiveFile();
-            if (currentFile && editorInstance) {
-                currentFile.history = editorInstance.getHistory();
-            }
+            if (currentFile && editorInstance) currentFile.history = editorInstance.getHistory();
 
             APP_STATE.activeFileId = fileId;
             loadActiveFileToEditor();
@@ -1696,16 +1574,11 @@ function testFunction() {
         function confirmCreateFile() {
             const nameInput = document.getElementById("newFileNameInput");
             const rawName = nameInput.value.trim().replace(/\.[^/.]+$/, "");
-            if (!rawName) {
-                showToast("Nama file kosong", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
+            if (!rawName) return showToast("Nama file kosong", "fa-triangle-exclamation", "text-amber-400");
 
             const type = document.querySelector('input[name="newFileType"]:checked').value;
-            const isDuplicate = APP_STATE.files.some(f => f.name.toLowerCase() === rawName.toLowerCase() && f.type === type);
-            if (isDuplicate) {
-                showToast("File dengan nama & tipe tersebut sudah ada!", "fa-triangle-exclamation", "text-amber-400");
-                return;
+            if (APP_STATE.files.some(f => f.name.toLowerCase() === rawName.toLowerCase() && f.type === type)) {
+                return showToast("File sudah ada!", "fa-triangle-exclamation", "text-amber-400");
             }
 
             const newFile = {
@@ -1713,9 +1586,7 @@ function testFunction() {
                 name: rawName,
                 type: type,
                 history: null,
-                content: type === "SERVER_JS" 
-                    ? `function ${rawName.toLowerCase()}Func() {\n  // Code for ${rawName}\n}`
-                    : `<!-- ${rawName}.html -->\n<div class="p-4">\n  <h2>${rawName}</h2>\n</div>`
+                content: type === "SERVER_JS" ? `function ${rawName.toLowerCase()}Func() {\n  // Code\n}` : `<!-- ${rawName}.html -->\n<div></div>`
             };
 
             APP_STATE.files.push(newFile);
@@ -1740,38 +1611,23 @@ function testFunction() {
         function confirmRenameFile() {
             const fileId = document.getElementById("renameFileTargetId").value;
             const newName = document.getElementById("renameFileNameInput").value.trim().replace(/\.[^/.]+$/, "");
-            if (!newName) {
-                showToast("Nama file tidak boleh kosong", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
-
+            if (!newName) return;
             const file = APP_STATE.files.find(f => f.id === fileId);
-            if (!file) return;
-
-            const isDuplicate = APP_STATE.files.some(f => f.id !== fileId && f.name.toLowerCase() === newName.toLowerCase() && f.type === file.type);
-            if (isDuplicate) {
-                showToast("Nama file sudah digunakan!", "fa-triangle-exclamation", "text-amber-400");
-                return;
+            if (file) {
+                file.name = newName;
+                closeModal("renameFileModal");
+                renderTabs();
+                renderFileList();
+                setDirty(true);
+                showToast("Nama file diperbarui!");
             }
-
-            file.name = newName;
-            closeModal("renameFileModal");
-            renderTabs();
-            renderFileList();
-            setDirty(true);
-            showToast("Nama file diperbarui!");
         }
 
         function deleteFile(fileId) {
-            if (APP_STATE.files.length <= 1) {
-                showToast("Minimal 1 file harus ada", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
+            if (APP_STATE.files.length <= 1) return showToast("Minimal 1 file harus ada", "fa-triangle-exclamation", "text-amber-400");
             if (confirm("Hapus file ini?")) {
                 APP_STATE.files = APP_STATE.files.filter(f => f.id !== fileId);
-                if (APP_STATE.activeFileId === fileId) {
-                    APP_STATE.activeFileId = APP_STATE.files[0].id;
-                }
+                if (APP_STATE.activeFileId === fileId) APP_STATE.activeFileId = APP_STATE.files[0].id;
                 renderTabs();
                 renderFileList();
                 loadActiveFileToEditor();
@@ -1780,7 +1636,7 @@ function testFunction() {
             }
         }
 
-        /* ================= GAS REST API & LOCAL STORAGE ================= */
+        /* ================= CLOUD SYNC & SAVE VIA BRIDGE ================= */
         function setDirty(state) {
             APP_STATE.isDirty = state;
             const badge = document.getElementById("syncStatusBadge");
@@ -1801,16 +1657,9 @@ function testFunction() {
                     projectTitle: APP_STATE.projectTitle,
                     scriptId: APP_STATE.scriptId,
                     activeDeploymentId: APP_STATE.activeDeploymentId,
-                    files: APP_STATE.files.map(f => ({
-                        id: f.id,
-                        name: f.name,
-                        type: f.type,
-                        content: f.content
-                    }))
+                    files: APP_STATE.files.map(f => ({ id: f.id, name: f.name, type: f.type, content: f.content }))
                 }));
-            } catch (e) {
-                showToast("Peringatan: Memori browser penuh! Segera unduh file.", "fa-triangle-exclamation", "text-amber-400");
-            }
+            } catch (e) {}
         }
 
         function loadStateFromStorage() {
@@ -1828,229 +1677,33 @@ function testFunction() {
             }
         }
 
-        function requestFreshToken() {
-            if (tokenClientInstance) {
-                try {
-                    tokenClientInstance.requestAccessToken({ prompt: "" });
-                } catch(e) {
-                    tokenClientInstance.requestAccessToken({ prompt: "consent" });
-                }
-            } else {
-                initGoogleIdentity();
-                if (tokenClientInstance) tokenClientInstance.requestAccessToken({ prompt: "consent" });
-            }
-        }
-
         document.getElementById("btnSaveCode").addEventListener("click", async () => {
             const saveBtn = document.getElementById("btnSaveCode");
             saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[9px]"></i>';
 
-            if (!APP_STATE.accessToken) {
-                setTimeout(() => {
-                    setDirty(false);
-                    saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-[9px]"></i> <span>Simpan</span>';
-                    showToast("Tersimpan di browser (Demo)");
-                    appendLog("INFO", "Disimpan lokal di HP. Hubungkan login Gmail untuk push ke GAS.");
-                }, 300);
-                return;
-            }
-
             try {
-                const apiPayload = {
-                    files: APP_STATE.files.map(f => ({
-                        name: f.name,
-                        type: f.type,
-                        source: f.content
-                    }))
-                };
+                const apiPayloadFiles = APP_STATE.files.map(f => ({
+                    name: f.name,
+                    type: f.type,
+                    source: f.content
+                }));
 
-                const response = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/content`, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `Bearer ${APP_STATE.accessToken}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(apiPayload)
-                });
-
-                if (response.status === 401 || response.status === 403) {
-                    showToast("Sesi Google habis. Memperbarui sesi...", "fa-triangle-exclamation", "text-amber-400");
-                    requestFreshToken();
-                    return;
-                }
-
-                if (!response.ok) throw new Error("Gagal simpan ke Google Apps Script");
-
+                await callBridge("UPDATE_PROJECT", { files: apiPayloadFiles });
                 setDirty(false);
-                showToast("Disuntikkan ke GAS Asli!", "fa-circle-check", "text-emerald-400");
-                appendLog("SUCCESS", `Update ${APP_STATE.files.length} file ke GAS Cloud.`);
+                showToast("Tersimpan Permanen di GAS Cloud!", "fa-circle-check", "text-emerald-400");
+                appendLog("SUCCESS", `Update ${APP_STATE.files.length} file sukses dikirim ke GAS.`);
             } catch (err) {
                 showToast(err.message, "fa-circle-exclamation", "text-rose-400");
-                appendLog("ERROR", "Push gagal: " + err.message);
+                appendLog("ERROR", "Simpan gagal: " + err.message);
             } finally {
                 saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-[9px]"></i> <span>Simpan</span>';
             }
         });
 
-        /* ================= RUN FUNCTION SIMULATOR ================= */
-        document.getElementById("btnRunCode").addEventListener("click", async () => {
-            const selectedFunc = document.getElementById("funcSelect").value;
-            toggleLogConsole(true);
-            appendLog("INFO", `Menjalankan: ${selectedFunc}() ...`);
-            const startTime = performance.now();
-
-            setTimeout(() => {
-                const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-                document.getElementById("logExecTime").classList.remove("hidden");
-                document.getElementById("logExecTime").textContent = `(${duration}s)`;
-
-                if (selectedFunc === "doGet") {
-                    appendLog("LOG", "HtmlOutput object dibuat. Title: 'Aplikasi Mobile GAS'");
-                    appendLog("SUCCESS", `Eksekusi doGet() sukses (${duration}s)`);
-                } else if (selectedFunc === "doPost") {
-                    appendLog("LOG", "Payload mock test diterima: {\"status\": \"ok\"}");
-                    appendLog("SUCCESS", `Response 200 OK (${duration}s)`);
-                } else {
-                    const time = new Date().toLocaleTimeString("id-ID");
-                    appendLog("LOG", `Logger.log: ${selectedFunc} sukses pada ${time}`);
-                    appendLog("SUCCESS", `Fungsi ${selectedFunc}() selesai (${duration}s)`);
-                }
-            }, 300);
-        });
-
-        /* ================= LOGS ================= */
-        function toggleLogConsole(forceOpen) {
-            const drawer = document.getElementById("logConsoleDrawer");
-            const isOpen = !drawer.classList.contains("translate-y-full");
-            if (forceOpen === true || (forceOpen === undefined && !isOpen)) {
-                drawer.classList.remove("translate-y-full");
-            } else {
-                drawer.classList.add("translate-y-full");
-            }
-        }
-
-        function appendLog(level, message) {
-            const container = document.getElementById("logContainer");
-            const time = new Date().toLocaleTimeString("id-ID");
-            
-            let color = "text-slate-300";
-            let prefix = "[INFO]";
-            if (level === "ERROR") { color = "text-rose-400"; prefix = "[ERROR]"; }
-            else if (level === "SUCCESS") { color = "text-emerald-400"; prefix = "[OK]"; }
-            else if (level === "LOG") { color = "text-amber-300"; prefix = "[LOG]"; }
-
-            const line = document.createElement("div");
-            line.className = `${color} flex items-start space-x-1.5 leading-tight`;
-            line.innerHTML = `
-                <span class="text-slate-500 shrink-0 font-mono text-[9px]">${time}</span>
-                <span class="font-bold shrink-0 text-[9px]">${prefix}</span>
-                <span class="break-all font-mono">${escapeHtml(message)}</span>
-            `;
-            container.appendChild(line);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function clearLogs() {
-            document.getElementById("logContainer").innerHTML = '<div class="text-slate-500 italic">Log dibersihkan.</div>';
-            document.getElementById("logExecTime").classList.add("hidden");
-        }
-
-        /* ================= GOOGLE IDENTITY (OAUTH 2.0 WITH PROFILE FETCH) ================= */
-        function initGoogleIdentity() {
-            if (window.google && APP_STATE.clientId) {
-                try {
-                    tokenClientInstance = google.accounts.oauth2.initTokenClient({
-                        client_id: APP_STATE.clientId,
-                        scope: "https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email",
-                        error_callback: (err) => {
-                            if (err.type === "interaction_required") {
-                                tokenClientInstance.requestAccessToken({ prompt: "consent" });
-                            }
-                        },
-                        callback: async (resp) => {
-                            if (resp.access_token) {
-                                const expiresIn = Number(resp.expires_in || 3600);
-                                const expiresAt = Date.now() + (expiresIn * 1000);
-                                APP_STATE.accessToken = resp.access_token;
-                                
-                                localStorage.setItem("gas_access_token", resp.access_token);
-                                localStorage.setItem("gas_token_expires_at", expiresAt.toString());
-
-                                try {
-                                    const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                                        headers: { "Authorization": `Bearer ${resp.access_token}` }
-                                    });
-                                    if (userRes.ok) {
-                                        const userData = await userRes.json();
-                                        APP_STATE.userEmail = userData.email;
-                                        localStorage.setItem("gas_user_email", userData.email);
-                                        if (userData.picture) {
-                                            localStorage.setItem("gas_user_picture", userData.picture);
-                                        }
-                                    }
-                                } catch(e) {}
-
-                                updateAuthUI();
-                                showToast("Login Google Berhasil!", "fa-circle-check", "text-emerald-400");
-                                fetchDeploymentsList();
-                            }
-                        }
-                    });
-                } catch (e) {}
-            }
-        }
-
-        function handleAuthAction() {
-            if (APP_STATE.accessToken) {
-                APP_STATE.accessToken = null;
-                APP_STATE.userEmail = null;
-                localStorage.removeItem("gas_access_token");
-                localStorage.removeItem("gas_token_expires_at");
-                localStorage.removeItem("gas_user_email");
-                localStorage.removeItem("gas_user_picture");
-                updateAuthUI();
-                showToast("Logout selesai");
-                return;
-            }
-
-            if (!APP_STATE.clientId) {
-                openSettingsModal();
-                showToast("Isi Google OAuth Client ID dulu", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
-
-            if (!window.google || !window.google.accounts) {
-                showToast("Sedang memuat Google Service, silakan coba lagi...", "fa-spinner", "text-blue-400");
-                return;
-            }
-
-            if (tokenClientInstance) tokenClientInstance.requestAccessToken({ prompt: "consent" });
-            else {
-                initGoogleIdentity();
-                if (tokenClientInstance) tokenClientInstance.requestAccessToken({ prompt: "consent" });
-            }
-        }
-
         async function fetchRemoteProject() {
-            if (!APP_STATE.accessToken) {
-                showToast("Login ke Google terlebih dahulu", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
-
             try {
-                showToast("Mengunduh dari GAS...");
-                const response = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/content`, {
-                    headers: { "Authorization": `Bearer ${APP_STATE.accessToken}` }
-                });
-
-                if (response.status === 401 || response.status === 403) {
-                    showToast("Sesi Google habis. Memperbarui sesi...", "fa-triangle-exclamation", "text-amber-400");
-                    requestFreshToken();
-                    return;
-                }
-
-                if (!response.ok) throw new Error("Gagal mengambil file");
-                const data = await response.json();
+                showToast("Mengunduh dari GAS Cloud...");
+                const data = await callBridge("FETCH_PROJECT");
 
                 if (data.files && data.files.length) {
                     APP_STATE.files = data.files.map((f, i) => ({
@@ -2067,11 +1720,39 @@ function testFunction() {
                     updateFunctionDropdown();
                     setDirty(false);
                     showToast("Proyek disinkronkan dari Cloud!");
+                    appendLog("SUCCESS", `Berhasil memuat ${data.files.length} file dari Cloud.`);
                 }
             } catch (err) {
                 showToast(err.message, "fa-circle-exclamation", "text-rose-400");
+                appendLog("ERROR", "Sync Cloud gagal: " + err.message);
             }
         }
+
+        /* ================= RUN FUNCTION SIMULATOR ================= */
+        document.getElementById("btnRunCode").addEventListener("click", async () => {
+            const selectedFunc = document.getElementById("funcSelect").value;
+            toggleLogConsole(true);
+            appendLog("INFO", `Menjalankan: ${selectedFunc}() ...`);
+            const startTime = performance.now();
+
+            setTimeout(() => {
+                const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+                document.getElementById("logExecTime").classList.remove("hidden");
+                document.getElementById("logExecTime").textContent = `(${duration}s)`;
+
+                if (selectedFunc === "doGet") {
+                    appendLog("LOG", "HtmlOutput dievaluasi. Judul: 'Aplikasi Mobile GAS'");
+                    appendLog("SUCCESS", `Eksekusi doGet() sukses (${duration}s)`);
+                } else if (selectedFunc === "doPost") {
+                    appendLog("LOG", "Payload test diterima: {\"status\": \"ok\"}");
+                    appendLog("SUCCESS", `Response 200 OK (${duration}s)`);
+                } else {
+                    const time = new Date().toLocaleTimeString("id-ID");
+                    appendLog("LOG", `Logger.log: ${selectedFunc} berjalan sukses pada ${time}`);
+                    appendLog("SUCCESS", `Fungsi ${selectedFunc}() selesai (${duration}s)`);
+                }
+            }, 250);
+        });
 
         /* ================= DEPLOYMENT MANAGER ================= */
         document.getElementById("btnDeploy").onclick = () => {
@@ -2081,17 +1762,12 @@ function testFunction() {
         };
 
         async function fetchDeploymentsList() {
-            if (!APP_STATE.accessToken) return;
+            if (!APP_STATE.bridgeUrl) return;
             try {
-                const res = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/deployments`, {
-                    headers: { "Authorization": `Bearer ${APP_STATE.accessToken}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.deployments) {
-                        APP_STATE.deploymentsList = data.deployments;
-                        populateDeploymentsDropdown();
-                    }
+                const data = await callBridge("LIST_DEPLOYMENTS");
+                if (data.deployments) {
+                    APP_STATE.deploymentsList = data.deployments;
+                    populateDeploymentsDropdown();
                 }
             } catch (e) {
                 console.warn("Could not fetch remote deployments", e);
@@ -2156,8 +1832,6 @@ function testFunction() {
             const url = document.getElementById("webAppUrlDisplay").textContent.trim();
             if (url.startsWith("http")) {
                 navigator.clipboard.writeText(url).then(() => showToast("URL disalin!"));
-            } else {
-                showToast("Belum ada URL aktif untuk disalin", "fa-triangle-exclamation", "text-amber-400");
             }
         }
 
@@ -2168,75 +1842,29 @@ function testFunction() {
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
 
-            if (!APP_STATE.accessToken) {
-                setTimeout(() => {
-                    if (mode !== "CREATE_NEW") {
-                        showToast("Deployment diperbarui (URL Tetap)!");
-                        appendLog("SUCCESS", `[Demo] Deployment '${APP_STATE.activeDeploymentId}' terupdate.`);
-                    } else {
-                        const newMockDepId = "AKfycbz_NewDep_" + Math.random().toString(36).substr(2, 6);
-                        APP_STATE.activeDeploymentId = newMockDepId;
-                        document.getElementById("webAppUrlDisplay").textContent = `https://script.google.com/macros/s/${newMockDepId}/exec`;
-                        showToast("Deployment baru dibuat!");
-                        appendLog("SUCCESS", `[Demo] Deployment baru: ${newMockDepId}`);
-                    }
-                    btn.disabled = false;
-                    handleDeploymentSelectionChange();
-                    closeModal("deployModal");
-                }, 400);
-                return;
-            }
-
             try {
-                const versionResp = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/versions`, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${APP_STATE.accessToken}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({ description: desc })
+                const res = await callBridge("CREATE_VERSION_DEPLOY", {
+                    deploymentId: mode,
+                    description: desc
                 });
 
-                if (versionResp.status === 401 || versionResp.status === 403) {
-                    showToast("Sesi Google habis. Memperbarui sesi...", "fa-triangle-exclamation", "text-amber-400");
-                    requestFreshToken();
-                    return;
-                }
-
-                if (!versionResp.ok) throw new Error("Gagal membuat versi script");
-                const versionData = await versionResp.json();
-                const newVersionNumber = versionData.versionNumber;
-
-                if (mode !== "CREATE_NEW") {
-                    const updateResp = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/deployments/${mode}`, {
-                        method: "PUT",
-                        headers: { "Authorization": `Bearer ${APP_STATE.accessToken}`, "Content-Type": "application/json" },
-                        body: JSON.stringify({ deploymentConfig: { versionNumber: newVersionNumber, description: desc } })
-                    });
-                    if (!updateResp.ok) throw new Error("Gagal memperbarui deployment");
-                    showToast("Deployment terupdate! URL tetap sama.");
-                } else {
-                    const createResp = await fetch(`https://script.googleapis.com/v1/projects/${APP_STATE.scriptId}/deployments`, {
-                        method: "POST",
-                        headers: { "Authorization": `Bearer ${APP_STATE.accessToken}`, "Content-Type": "application/json" },
-                        body: JSON.stringify({ versionNumber: newVersionNumber, description: desc })
-                    });
-                    if (!createResp.ok) throw new Error("Gagal membuat deployment");
-                    const newDepData = await createResp.json();
-                    APP_STATE.activeDeploymentId = newDepData.deploymentId;
-                    document.getElementById("webAppUrlDisplay").textContent = `https://script.google.com/macros/s/${newDepData.deploymentId}/exec`;
-                    showToast("Deployment baru berhasil dibuat!");
-                }
-
+                APP_STATE.activeDeploymentId = res.deploymentId;
+                document.getElementById("webAppUrlDisplay").textContent = res.webAppUrl;
+                showToast("Deployment Berhasil Dirilis!");
+                appendLog("SUCCESS", `Deployment selesai: ${res.deploymentId}`);
                 saveStateToStorage();
                 fetchDeploymentsList();
                 closeModal("deployModal");
             } catch (err) {
                 showToast(err.message, "fa-circle-exclamation", "text-rose-400");
+                appendLog("ERROR", "Deploy gagal: " + err.message);
             } finally {
                 btn.disabled = false;
                 handleDeploymentSelectionChange();
             }
         }
 
-        /* ================= LIVE PREVIEW ================= */
+        /* ================= LIVE PREVIEW SANDBOX ================= */
         function openLivePreviewModal() {
             document.getElementById("previewModal").classList.remove("hidden");
             refreshLivePreview();
@@ -2265,33 +1893,17 @@ function testFunction() {
                 <script>
                     window.google = window.google || {};
                     google.script = google.script || {};
-                    
                     function createGasRunner(handlers) {
                         handlers = handlers || {};
                         return new Proxy({}, {
                             get: function(target, prop) {
-                                if (prop === 'withSuccessHandler') {
-                                    return function(fn) {
-                                        return createGasRunner(Object.assign({}, handlers, { success: fn }));
-                                    };
-                                }
-                                if (prop === 'withFailureHandler') {
-                                    return function(fn) {
-                                        return createGasRunner(Object.assign({}, handlers, { failure: fn }));
-                                    };
-                                }
-                                if (prop === 'withUserObject') {
-                                    return function(obj) {
-                                        return createGasRunner(Object.assign({}, handlers, { userObj: obj }));
-                                    };
-                                }
+                                if (prop === 'withSuccessHandler') return function(fn) { return createGasRunner(Object.assign({}, handlers, { success: fn })); };
+                                if (prop === 'withFailureHandler') return function(fn) { return createGasRunner(Object.assign({}, handlers, { failure: fn })); };
+                                if (prop === 'withUserObject') return function(obj) { return createGasRunner(Object.assign({}, handlers, { userObj: obj })); };
                                 return function() {
                                     var args = Array.prototype.slice.call(arguments);
-                                    console.log('[Mock google.script.run] Eksekusi:', prop, args);
                                     setTimeout(function() {
-                                        if (handlers.success) {
-                                            handlers.success({ status: 'success', mockData: 'Respon simulasi untuk ' + prop, args: args }, handlers.userObj);
-                                        }
+                                        if (handlers.success) handlers.success({ status: 'success', mockData: 'Respon simulasi untuk ' + prop, args: args }, handlers.userObj);
                                     }, 150);
                                 };
                             }
@@ -2303,22 +1915,14 @@ function testFunction() {
             iframe.srcdoc = mockGasClientScript + compiledContent;
         }
 
-        /* ================= SNIPPETS ================= */
-        function openSnippetModal() {
-            document.getElementById("snippetModal").classList.remove("hidden");
-        }
-
+        /* ================= SNIPPETS & LOGS ================= */
+        function openSnippetModal() { document.getElementById("snippetModal").classList.remove("hidden"); }
         function applySnippet(snippetType) {
             let codeToInsert = "";
-            if (snippetType === "doGetWeb") {
-                codeToInsert = `\nfunction doGet(e) {\n  return HtmlService.createTemplateFromFile('index')\n    .evaluate()\n    .setTitle('Web App')\n    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);\n}\n`;
-            } else if (snippetType === "doPostJson") {
-                codeToInsert = `\nfunction doPost(e) {\n  const payload = JSON.parse(e.postData.contents);\n  return ContentService.createTextOutput(JSON.stringify({\n    status: 'success',\n    data: payload\n  })).setMimeType(ContentService.MimeType.JSON);\n}\n`;
-            } else if (snippetType === "sheetAppend") {
-                codeToInsert = `\nfunction appendToSheet(dataRow) {\n  const ss = SpreadsheetApp.getActiveSpreadsheet();\n  const sheet = ss.getSheetByName('Sheet1') || ss.getActiveSheet();\n  sheet.appendRow(dataRow);\n}\n`;
-            } else if (snippetType === "sheetReadJson") {
-                codeToInsert = `\nfunction getSheetDataAsJson() {\n  const sheet = SpreadsheetApp.getActiveSheet();\n  const values = sheet.getDataRange().getValues();\n  const headers = values[0];\n  const results = [];\n  for (let i = 1; i < values.length; i++) {\n    const row = {};\n    for (let j = 0; j < headers.length; j++) {\n      row[headers[j]] = values[i][j];\n    }\n    results.push(row);\n  }\n  return results;\n}\n`;
-            }
+            if (snippetType === "doGetWeb") codeToInsert = `\nfunction doGet(e) {\n  return HtmlService.createTemplateFromFile('index').evaluate().setTitle('Web App').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);\n}\n`;
+            else if (snippetType === "doPostJson") codeToInsert = `\nfunction doPost(e) {\n  const payload = JSON.parse(e.postData.contents);\n  return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: payload })).setMimeType(ContentService.MimeType.JSON);\n}\n`;
+            else if (snippetType === "sheetAppend") codeToInsert = `\nfunction appendToSheet(dataRow) {\n  const ss = SpreadsheetApp.getActiveSpreadsheet();\n  const sheet = ss.getSheetByName('Sheet1') || ss.getActiveSheet();\n  sheet.appendRow(dataRow);\n}\n`;
+            else if (snippetType === "sheetReadJson") codeToInsert = `\nfunction getSheetDataAsJson() {\n  const sheet = SpreadsheetApp.getActiveSheet();\n  const values = sheet.getDataRange().getValues();\n  const headers = values[0];\n  const results = [];\n  for (let i = 1; i < values.length; i++) {\n    const row = {};\n    for (let j = 0; j < headers.length; j++) row[headers[j]] = values[i][j];\n    results.push(row);\n  }\n  return results;\n}\n`;
 
             if (codeToInsert && editorInstance) {
                 const doc = editorInstance.getDoc();
@@ -2331,7 +1935,30 @@ function testFunction() {
             }
         }
 
-        /* ================= MODAL & UI HELPERS ================= */
+        function toggleLogConsole(forceOpen) {
+            const drawer = document.getElementById("logConsoleDrawer");
+            const isOpen = !drawer.classList.contains("translate-y-full");
+            if (forceOpen === true || (forceOpen === undefined && !isOpen)) drawer.classList.remove("translate-y-full");
+            else drawer.classList.add("translate-y-full");
+        }
+
+        function appendLog(level, message) {
+            const container = document.getElementById("logContainer");
+            const time = new Date().toLocaleTimeString("id-ID");
+            let color = level === "ERROR" ? "text-rose-400" : level === "SUCCESS" ? "text-emerald-400" : "text-slate-300";
+            const line = document.createElement("div");
+            line.className = `${color} flex items-start space-x-1.5 leading-tight`;
+            line.innerHTML = `<span class="text-slate-500 shrink-0 font-mono text-[9px]">${time}</span><span class="font-bold shrink-0 text-[9px]">[${level}]</span><span class="break-all font-mono">${escapeHtml(message)}</span>`;
+            container.appendChild(line);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById("logContainer").innerHTML = '<div class="text-slate-500 italic">Log dibersihkan.</div>';
+            document.getElementById("logExecTime").classList.add("hidden");
+        }
+
+        /* ================= MODAL & CONFIG HELPERS ================= */
         function toggleSidebar(show) {
             const drawer = document.getElementById("sidebarDrawer");
             const overlay = document.getElementById("sidebarOverlay");
@@ -2345,12 +1972,10 @@ function testFunction() {
                 setTimeout(() => overlay.classList.add("hidden"), 200);
             }
         }
-
         document.getElementById("btnOpenSidebar").onclick = () => toggleSidebar(true);
 
         function openModal(id) { document.getElementById(id).classList.remove("hidden"); }
         function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
-
         function openNewFileModal() { toggleSidebar(false); openModal("newFileModal"); }
         function openProjectModal() {
             document.getElementById("inputProjectTitle").value = APP_STATE.projectTitle;
@@ -2362,11 +1987,14 @@ function testFunction() {
             const title = document.getElementById("inputProjectTitle").value.trim();
             const sid = document.getElementById("inputScriptId").value.trim();
             if (title) APP_STATE.projectTitle = title;
-            if (sid) APP_STATE.scriptId = sid;
+            if (sid) {
+                APP_STATE.scriptId = sid;
+                localStorage.setItem("gas_script_id", sid);
+            }
             updateHeaderInfo();
             closeModal("projectModal");
             saveStateToStorage();
-            showToast("Konfigurasi diperbarui");
+            showToast("Konfigurasi proyek disimpan");
         }
 
         function updateHeaderInfo() {
@@ -2374,17 +2002,21 @@ function testFunction() {
         }
 
         function openSettingsModal() {
-            document.getElementById("settingClientId").value = APP_STATE.clientId;
+            document.getElementById("settingBridgeUrl").value = APP_STATE.bridgeUrl;
+            document.getElementById("settingBridgePin").value = APP_STATE.bridgePin;
             openModal("settingsModal");
         }
 
         function saveAppSettings() {
-            const cid = document.getElementById("settingClientId").value.trim();
-            APP_STATE.clientId = cid;
-            localStorage.setItem("gas_oauth_client_id", cid);
-            initGoogleIdentity();
+            const bUrl = document.getElementById("settingBridgeUrl").value.trim();
+            const bPin = document.getElementById("settingBridgePin").value.trim();
+            APP_STATE.bridgeUrl = bUrl;
+            APP_STATE.bridgePin = bPin || "123456";
+            localStorage.setItem("gas_bridge_url", bUrl);
+            localStorage.setItem("gas_bridge_pin", APP_STATE.bridgePin);
             closeModal("settingsModal");
-            showToast("Pengaturan disimpan");
+            showToast("Pengaturan Bridge disimpan");
+            testBridgeConnection();
         }
 
         function changeFontSize(size) {
@@ -2395,8 +2027,7 @@ function testFunction() {
         function exportActiveFile() {
             const file = getActiveFile();
             const ext = file.type === "HTML" ? ".html" : file.type === "JSON" ? ".json" : ".gs";
-            const mime = file.type === "HTML" ? "text/html" : file.type === "JSON" ? "application/json" : "text/javascript";
-            const blob = new Blob([file.content], { type: mime + ";charset=utf-8" });
+            const blob = new Blob([file.content], { type: "text/plain;charset=utf-8" });
             const dlAnchor = document.createElement("a");
             const blobUrl = URL.createObjectURL(blob);
             dlAnchor.href = blobUrl;
@@ -2407,11 +2038,7 @@ function testFunction() {
         }
 
         function exportProjectZip() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(APP_STATE.files.map(f => ({
-                name: f.name,
-                type: f.type,
-                content: f.content
-            })), null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(APP_STATE.files.map(f => ({ name: f.name, type: f.type, content: f.content })), null, 2));
             const dlAnchor = document.createElement("a");
             dlAnchor.setAttribute("href", dataStr);
             dlAnchor.setAttribute("download", `${APP_STATE.projectTitle}_backup.json`);
@@ -2424,10 +2051,8 @@ function testFunction() {
             document.getElementById("toastMsg").textContent = msg;
             const iconEl = document.getElementById("toastIcon");
             iconEl.className = `fa-solid ${icon} ${iconColor}`;
-
             toast.classList.remove("opacity-0", "-translate-y-12", "pointer-events-none");
             toast.classList.add("opacity-100", "translate-y-0");
-
             setTimeout(() => {
                 toast.classList.remove("opacity-100", "translate-y-0");
                 toast.classList.add("opacity-0", "-translate-y-12", "pointer-events-none");
